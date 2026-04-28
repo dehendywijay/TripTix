@@ -12,12 +12,12 @@ func CreateWisata(data models.Wisata) (models.Wisata, error) {
 
 func GetAllWisata() ([]models.Wisata, error) {
 	var wisata []models.Wisata
-	err := config.DB.Preload("Foto").Preload("Review").Find(&wisata).Error
+	err := config.DB.Preload("Fotos").Preload("Reviews").Find(&wisata).Error
 	return wisata, err
 }
 
 func GetWisataByID(id string) (models.Wisata, error) {
 	var wisata models.Wisata
-	err := config.DB.Preload("Foto").Preload("Review").First(&wisata, id).Error
+	err := config.DB.Preload("Fotos").Preload("Reviews").First(&wisata, id).Error
 	return wisata, err
 }
