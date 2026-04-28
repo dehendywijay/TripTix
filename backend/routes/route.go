@@ -29,5 +29,6 @@ func ReviewRoute(r *gin.Engine) {
 	review := r.Group("/api/review")
 	{
 		review.POST("", controller.CreateReview)
+		review.GET("/wisata/:wisata_id", controller.GetReviewsByWisata)
 	}
 }
