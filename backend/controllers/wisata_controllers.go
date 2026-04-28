@@ -23,5 +23,16 @@ func CreateWisata(c *gin.Context) {
 		"message": "Wisata created successfully",
 		"data":    wisata,
 	})
-	
+
 }
+
+func GetAllWisata(c *gin.Context) {
+	wisata, err := services.GetAllWisata()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": wisata,
+	})
+}	
