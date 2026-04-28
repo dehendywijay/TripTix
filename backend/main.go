@@ -17,6 +17,7 @@ func main() {
 
 	routes.WisataRoute(r)
 	routes.UserRoute(r)
+	routes.ReviewRoute(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {
