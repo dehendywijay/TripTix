@@ -9,3 +9,9 @@ func CreateWisata(data models.Wisata) (models.Wisata, error) {
 	err := config.DB.Create(&data).Error
 	return data, err
 }
+
+func GetAllWisata() ([]models.Wisata, error) {
+	var wisata []models.Wisata
+	err := config.DB.Preload("Foto").Preload("Review").Find(&wisata).Error
+	return wisata, err
+}
