@@ -10,5 +10,7 @@ func WisataRoute(r *gin.Engine) {
 	wisata := r.Group("/api/wisata")
 	{
 		wisata.POST("", controller.CreateWisata)
+		wisata.GET("", controller.GetAllWisata)
+		wisata.GET("/:id", controller.GetWisataByID)
 	}
 }
