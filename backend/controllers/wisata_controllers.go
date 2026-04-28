@@ -36,3 +36,15 @@ func GetAllWisata(c *gin.Context) {
 		"data": wisata,
 	})
 }	
+
+func GetWisataByID(c *gin.Context) {
+	id := c.Param("id")
+	wisata, err := services.GetWisataByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": wisata,
+	})
+}
