@@ -1,0 +1,38 @@
+package dto
+
+type CreateReviewRequest struct {
+	UserID   uint   `json:"user_id" binding:"required"`
+	WisataID uint   `json:"wisata_id" binding:"required"`
+	Rating  int    `json:"rating" binding:"required,min=1,max=5"`
+	Comment string `json:"comment" binding:"required"`
+}
+
+type ReviewResponse struct {
+	ID       uint   `json:"id"`
+	UserID   uint   `json:"user_id"`
+	WisataID uint   `json:"wisata_id"`
+	Rating   int    `json:"rating"`
+	Comment  string `json:"comment"`
+}
+
+type UserReviewResponse struct {
+	ID   uint   `json:"id"`
+	Nama string `json:"nama"`
+}
+
+type WisataReviewResponse struct {
+	ID   uint   `json:"id"`
+	Nama string `json:"nama"`
+}
+
+type ReviewItemResponse struct {
+	ID      uint               `json:"id"`
+	Rating  int                `json:"rating"`
+	Comment string             `json:"comment"`
+	User    UserReviewResponse `json:"user"`
+}
+
+type ReviewsByWisataResponse struct {
+	Wisata  WisataReviewResponse `json:"wisata"`
+	Reviews []ReviewItemResponse `json:"reviews"`
+}

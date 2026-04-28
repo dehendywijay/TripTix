@@ -25,3 +25,9 @@ func LoginUser(email string, password string) (models.User, error) {
 
 	return user, nil
 }
+
+func GetUser(email string) (models.User, error) {
+	var user models.User
+	err := config.DB.Select("id", "nama", "email").Preload("Reviews").Where("email = ?", email).First(&user).Error
+	return user, err
+}
