@@ -21,5 +21,6 @@ func UserRoute(r *gin.Engine) {
 	{
 		user.POST("/register", controller.RegisterUser)
 		user.POST("/login", controller.LoginUser)
+		user.GET("", controller.GetUser)
 	}
 }
