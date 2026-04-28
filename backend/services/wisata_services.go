@@ -15,3 +15,9 @@ func GetAllWisata() ([]models.Wisata, error) {
 	err := config.DB.Preload("Foto").Preload("Review").Find(&wisata).Error
 	return wisata, err
 }
+
+func GetWisataByID(id uint) (models.Wisata, error) {
+	var wisata models.Wisata
+	err := config.DB.Preload("Foto").Preload("Review").First(&wisata, id).Error
+	return wisata, err
+}
