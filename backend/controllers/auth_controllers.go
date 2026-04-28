@@ -41,13 +41,17 @@ func LoginUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Data tidak ditemukan",
+		})
 		return
 	}
 
 	user, err := services.LoginUser(req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Password atau email Salah",
+		})
 		return
 	}
 
@@ -62,14 +66,16 @@ func GetUser(c *gin.Context) {
 
 	if email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "email is required",
+			"error": "Email dibutuhkan",
 		})
 		return
 	}
 
 	user, err := services.GetUser(email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Email tidak ditemukan",
+		})
 		return
 	}
 

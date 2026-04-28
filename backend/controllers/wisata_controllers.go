@@ -10,17 +10,21 @@ import (
 func CreateWisata(c *gin.Context) {
 	var wisata models.Wisata
 	if err := c.BindJSON(&wisata); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Data tidak ditemukan",
+		})
 		return
 	}
 
 	wisata, err := services.CreateWisata(wisata)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Data wisata gagal dibuat",
+		})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Wisata created successfully",
+		"message": "Data wisata berhasil dibuat",
 		"data":    wisata,
 	})
 
@@ -29,7 +33,9 @@ func CreateWisata(c *gin.Context) {
 func GetAllWisata(c *gin.Context) {
 	wisata, err := services.GetAllWisata()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal mengambil data wisata",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -41,7 +47,9 @@ func GetWisataByID(c *gin.Context) {
 	id := c.Param("id")
 	wisata, err := services.GetWisataByID(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Data wisata tidak ditemukan",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
