@@ -4,6 +4,8 @@ import (
 	"triptix/config"
 	"triptix/dto"
 	"triptix/models"
+
+	"gorm.io/gorm"
 )
 
 
@@ -30,14 +32,47 @@ func CreateReview(req dto.CreateReviewRequest) (dto.ReviewResponse, error) {
 }
 
 
-func GetReviewsByWisataID(wisataID uint) ([]models.Review, error) {
-	var reviews []models.Review
+func GetReviewsByWisataID(wisataID uint) (dto.ReviewsByWisataResponse, error) {
 
+	var wisata models.Wisata
 	err := config.DB.
-		Preload("User").
-		Preload("Wisata").
+		Select("id", "nama").
+		First(&wisata, wisataID).Error
+	if err != nil {
+		return dto.ReviewsByWisataResponse{}, err
+	}
+
+	var reviews []models.Review
+	err = config.DB.
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "nama")
+		}).
 		Where("wisata_id = ?", wisataID).
 		Find(&reviews).Error
+	if err != nil {
+		return dto.ReviewsByWisataResponse{}, err
+	}
 
-	return reviews, err
+	var reviewResponses []dto.ReviewItemResponse
+	for _, r := range reviews {
+		reviewResponses = append(reviewResponses, dto.ReviewItemResponse{
+			ID:      r.ID,
+			Rating:  r.Rating,
+			Comment: r.Comment,
+			User: dto.UserReviewResponse{
+				ID:   r.User.ID,
+				Nama: r.User.Nama,
+			},
+		})
+	}
+
+	response := dto.ReviewsByWisataResponse{
+		Wisata: dto.WisataReviewResponse{
+			ID:   wisata.ID,
+			Nama: wisata.Nama,
+		},
+		Reviews: reviewResponses,
+	}
+
+	return response, nil
 }
