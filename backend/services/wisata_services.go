@@ -16,7 +16,7 @@ func GetAllWisata() ([]models.Wisata, error) {
 	return wisata, err
 }
 
-func GetWisataByID(id uint) (models.Wisata, error) {
+func GetWisataByID(id string) (models.Wisata, error) {
 	var wisata models.Wisata
 	err := config.DB.Preload("Foto").Preload("Review").First(&wisata, id).Error
 	return wisata, err
