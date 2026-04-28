@@ -13,4 +13,13 @@ func WisataRoute(r *gin.Engine) {
 		wisata.GET("", controller.GetAllWisata)
 		wisata.GET("/:id", controller.GetWisataByID)
 	}
+
+}
+
+func UserRoute(r *gin.Engine) {
+	user := r.Group("/api/user")
+	{
+		user.POST("/register", controller.RegisterUser)
+		user.POST("/login", controller.LoginUser)
+	}
 }
