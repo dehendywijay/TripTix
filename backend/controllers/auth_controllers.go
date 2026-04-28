@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"triptix/models"
 	"triptix/services"
 	"triptix/utils"
-	"github.com/gin-gonic/gin"
 )
 
 func RegisterUser(c *gin.Context) {
@@ -32,7 +32,7 @@ func RegisterUser(c *gin.Context) {
 		"message": "User created successfully",
 		"data":    user,
 	})
-	}
+}
 
 func LoginUser(c *gin.Context) {
 	var req struct {
@@ -59,6 +59,14 @@ func LoginUser(c *gin.Context) {
 
 func GetUser(c *gin.Context) {
 	email := c.Query("email")
+
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "email is required",
+		})
+		return
+	}
+
 	user, err := services.GetUser(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

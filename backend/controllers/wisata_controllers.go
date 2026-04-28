@@ -1,10 +1,10 @@
 package controller
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"triptix/models"
 	"triptix/services"
-	"github.com/gin-gonic/gin"
 )
 
 func CreateWisata(c *gin.Context) {
@@ -35,7 +35,7 @@ func GetAllWisata(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": wisata,
 	})
-}	
+}
 
 func GetWisataByID(c *gin.Context) {
 	id := c.Param("id")
