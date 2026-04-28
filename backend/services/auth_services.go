@@ -5,7 +5,8 @@ import (
 	"triptix/models"
 )
 
-func CreateUser(data models.User) (models.User, error) {
+func RegisterUser(data models.User) (models.User, error) {
 	err := config.DB.Create(&data).Error
 	return data, err
 }
+
