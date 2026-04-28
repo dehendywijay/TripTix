@@ -24,3 +24,10 @@ func UserRoute(r *gin.Engine) {
 		user.GET("", controller.GetUser)
 	}
 }
+
+func ReviewRoute(r *gin.Engine) {
+	review := r.Group("/api/review")
+	{
+		review.POST("", controller.CreateReview)
+	}
+}
