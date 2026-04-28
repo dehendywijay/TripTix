@@ -2,12 +2,12 @@ package controller
 
 import (
 	"net/http"
-	
+	"strconv"
+
+	"triptix/dto"
+	"triptix/services"
 
 	"github.com/gin-gonic/gin"
-	"triptix/models"
-	"triptix/services"
-	"triptix/dto"
 )
 
 func CreateReview(c *gin.Context) {
@@ -20,14 +20,7 @@ func CreateReview(c *gin.Context) {
 		return
 	}
 
-	review := models.Review{
-		UserID:   req.UserID,
-		WisataID: req.WisataID,
-		Rating:  req.Rating,
-		Comment: req.Comment,
-	}
-
-	result, err := services.CreateReview(review)
+	result, err := services.CreateReview(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Gagal membuat review",
@@ -38,5 +31,29 @@ func CreateReview(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Sukses membuat review",
 		"data":    result,
+	})
+}
+
+func GetReviewsByWisata(c *gin.Context) {
+	wisataIDParam := c.Param("wisata_id")
+
+	wisataID, err := strconv.Atoi(wisataIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid wisata id",
+		})
+		return
+	}
+
+	reviews, err := services.GetReviewsByWisataID(uint(wisataID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to get reviews",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": reviews,
 	})
 }
