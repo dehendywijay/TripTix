@@ -19,5 +19,9 @@ func CreateWisata(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, wisata)
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Wisata created successfully",
+		"data":    wisata,
+	})
+	
 }
