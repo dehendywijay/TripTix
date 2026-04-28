@@ -7,16 +7,18 @@ import { Destination } from "../data/destinations";
 
 interface DestinasiCardProps {
   destination: Destination;
+  horizontal?: boolean;
 }
 
-export default function DestinasiCard({ destination }: DestinasiCardProps) {
+export default function DestinasiCard({ destination, horizontal }: DestinasiCardProps) {
   const router = useRouter();
 
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => router.push(`/details/${destination.id}`)}
-      className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 mb-4 w-full"
+      className={`bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 mb-4 ${horizontal ? "w-72 mr-4" : "w-full"
+        }`}
     >
       <View className="relative">
         <Image
