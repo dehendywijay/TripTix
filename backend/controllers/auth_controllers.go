@@ -56,3 +56,16 @@ func LoginUser(c *gin.Context) {
 		"data":    user.Email,
 	})
 }
+
+func GetUser(c *gin.Context) {
+	email := c.Query("email")
+	user, err := services.GetUser(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": user,
+	})
+}
