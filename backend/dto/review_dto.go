@@ -14,3 +14,25 @@ type ReviewResponse struct {
 	Rating   int    `json:"rating"`
 	Comment  string `json:"comment"`
 }
+
+type UserReviewResponse struct {
+	ID   uint   `json:"id"`
+	Nama string `json:"nama"`
+}
+
+type WisataReviewResponse struct {
+	ID   uint   `json:"id"`
+	Nama string `json:"nama"`
+}
+
+type ReviewItemResponse struct {
+	ID      uint               `json:"id"`
+	Rating  int                `json:"rating"`
+	Comment string             `json:"comment"`
+	User    UserReviewResponse `json:"user"`
+}
+
+type ReviewsByWisataResponse struct {
+	Wisata  WisataReviewResponse `json:"wisata"`
+	Reviews []ReviewItemResponse `json:"reviews"`
+}
