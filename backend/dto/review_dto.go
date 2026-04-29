@@ -32,7 +32,19 @@ type ReviewItemResponse struct {
 	User    UserReviewResponse `json:"user"`
 }
 
+type ReviewsItemByUserResponse struct {
+	ID      uint                `json:"id"`
+	Rating  int                 `json:"rating"`
+	Comment string              `json:"comment"`
+	Wisata  WisataReviewResponse `json:"wisata"`
+}
+
 type ReviewsByWisataResponse struct {
 	Wisata  WisataReviewResponse `json:"wisata"`
 	Reviews []ReviewItemResponse `json:"reviews"`
+}
+
+type ReviewsByUserResponse struct {
+	User    UserReviewResponse   `json:"user"`
+	Reviews []ReviewsItemByUserResponse `json:"reviews"`
 }
