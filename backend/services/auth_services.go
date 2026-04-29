@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"triptix/config"
+	"triptix/dto"
 	"triptix/models"
 	"triptix/utils"
 )
@@ -12,18 +13,20 @@ func RegisterUser(data models.User) (models.User, error) {
 	return data, err
 }
 
-func LoginUser(email string, password string) (models.User, error) {
+func LoginUser(email string, password string) (dto.LoginRespone, error) {
 	var user models.User
 	err := config.DB.Where("email = ?", email).First(&user).Error
 	if err != nil {
-		return user, err
+		return dto.LoginRespone{}, err
 	}
 
 	if !utils.CheckPassword(user.Password, password) {
-		return user, fmt.Errorf("invalid credentials")
+		return dto.LoginRespone{}, fmt.Errorf("invalid credentials")
 	}
 
-	return user, nil
+	return dto.LoginRespone{
+		Email: user.Email,
+	}, nil
 }
 
 func GetUser(email string) (models.User, error) {
