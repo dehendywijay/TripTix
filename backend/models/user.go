@@ -9,4 +9,6 @@ type User struct {
 	Password string `json:"password" gorm:"not null"`
 
 	Reviews []Review `gorm:"foreignKey:UserID"`
+	Bookmarks []Bookmark `gorm:"foreignKey:UserID"`
 }
+
