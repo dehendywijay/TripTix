@@ -26,7 +26,7 @@ func UserRoute(r *gin.Engine) {
 }
 
 func ReviewRoute(r *gin.Engine) {
-	review := r.Group("/api/review")
+	review := r.Group("/api/reviews")
 	{
 		review.POST("", controller.CreateReview)
 		review.GET("/wisata/:wisata_id", controller.GetReviewsByWisata)
