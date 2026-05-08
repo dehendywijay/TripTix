@@ -10,5 +10,6 @@ type User struct {
 
 	Reviews []Review `gorm:"foreignKey:UserID"`
 	Bookmarks []Bookmark `gorm:"foreignKey:UserID"`
+	Orders    []Order `gorm:"foreignKey:UserID"`
 }
 
