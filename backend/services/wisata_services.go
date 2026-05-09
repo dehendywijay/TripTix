@@ -47,3 +47,15 @@ func CreateWisataFoto(data models.Foto) error {
 	err := config.DB.Create(&data).Error
 	return err
 }
+
+func EditWisata(id string, data models.Wisata) (models.Wisata, error) {
+	var wisata models.Wisata
+
+	err := config.DB.Where("ID = ? ", id).First(&wisata).Error
+	if err != nil {
+		return wisata, err
+	}
+
+	err = config.DB.Model(&wisata).Updates(data).Error
+	return wisata, err
+}
