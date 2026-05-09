@@ -3,18 +3,18 @@ package utils
 import (
 	"fmt"
 	"io"
+	"mime/multipart"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
+
 	"github.com/google/uuid"
 )
 
-func ProcessImageUpload(c *gin.Context, field string) ([]byte, string, string, error) {
-	file, err := c.FormFile(field)
-	if err != nil {
-		return nil, "", "", fmt.Errorf("gambar tidak boleh kosong")
+func ProcessImageUpload(file *multipart.FileHeader) ([]byte, string, string, error) {
+	if file == nil {
+		return nil, "", "", fmt.Errorf("gambar belum diunggah")
 	}
 
 	src, err := file.Open()
