@@ -8,10 +8,11 @@ import {
   SafeAreaView,
   StatusBar,
 } from "react-native";
-import { Search, Bell, MapPin, SlidersHorizontal, User } from "lucide-react-native";
+import { Search, Bell, User } from "lucide-react-native";
 import DestinasiCard from "../components/DestinasiCard";
 import KategoriList from "../components/KategoriList";
-import { destinations, categories } from "../data/destinations";
+import RecentTripCard from "../components/RecentTripCard";
+import { destinations, categories, recentTrips } from "../data/destinations";
 import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
@@ -19,12 +20,14 @@ export default function HomeScreen() {
   const [selectedKategori, setSelectedKategori] = useState("1");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const selectedCategoryObj = categories.find(c => c.id === selectedKategori);
+  const selectedCategoryObj = categories.find((c) => c.id === selectedKategori);
 
   const filteredDestinations = destinations.filter((item) => {
     const matchesKategori =
       selectedKategori === "1" || item.category === selectedCategoryObj?.name;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesKategori && matchesSearch;
   });
 
@@ -34,75 +37,77 @@ export default function HomeScreen() {
 
       {/* Header */}
       <View className="px-6 py-4 flex-row justify-between items-center">
-        <View>
-          <View className="flex-row items-center">
-            <MapPin size={14} color="#0ea5e9" />
-            <Text className="text-slate-500 text-xs ml-1 font-medium">Lokasi Anda</Text>
+        <View className="flex-row items-center">
+          <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
+            <User size={20} color="#FF6B5B" />
           </View>
-          <Text className="text-lg font-bold text-slate-900">Jakarta, Indonesia</Text>
+          <View>
+            <Text className="text-slate-400 text-xs">Welcome back!</Text>
+            <Text className="text-slate-900 font-bold text-base">Hello, Pengguna!</Text>
+          </View>
         </View>
-        <View className="flex-row items-center gap-2">
-          <TouchableOpacity
-            className="w-10 h-10 bg-white rounded-full items-center justify-center border border-slate-100 shadow-sm"
-            onPress={() => router.push("/profile")}
-          >
-            <User size={20} color="#1e293b" />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-10 h-10 bg-white rounded-full items-center justify-center border border-slate-100 shadow-sm">
-            <Bell size={20} color="#1e293b" />
-            <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity className="w-10 h-10 bg-white rounded-full items-center justify-center border border-slate-100 shadow-sm">
+          <Bell size={20} color="#1e293b" />
+          <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* Welcome Text */}
-        <View className="px-6 mt-4">
+        {/* Hero Text */}
+        <View className="px-6 mt-2">
           <Text className="text-3xl font-bold text-slate-900 leading-tight">
-            Jelajahi Keindahan{"\n"}
-            <Text className="text-primary">Destinasi Lokal</Text>
+            Where do you want to{"\n"}explore today?
           </Text>
         </View>
 
         {/* Search Bar */}
-        <View className="px-6 mt-6">
+        <View className="px-6 mt-5">
           <View className="flex-row items-center bg-white px-4 py-3 rounded-2xl border border-slate-100 shadow-sm">
-            <Search size={20} color="#94a3b8" />
             <TextInput
-              placeholder="Cari destinasi impianmu..."
-              className="ml-2 flex-1 text-slate-900 text-base"
+              placeholder="Explore by destination"
+              className="flex-1 text-slate-900 text-base"
               placeholderTextColor="#94a3b8"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
+            <Search size={20} color="#94a3b8" />
           </View>
         </View>
 
         {/* Categories */}
-        <View className="mt-8">
-          <View className="px-6 flex-row justify-between items-center mb-4">
-            <Text className="text-xl font-bold text-slate-900">Kategori</Text>
-            <TouchableOpacity onPress={() => router.push("/category/1")}>
-              <Text className="text-primary font-semibold">Lihat Semua</Text>
-            </TouchableOpacity>
-          </View>
+        <View className="mt-5">
           <KategoriList
             selectedId={selectedKategori}
-            onSelect={(id) => {
-              setSelectedKategori(id);
-              router.push(`/category/${id}`);
-            }}
+            onSelect={(id) => setSelectedKategori(id)}
           />
         </View>
 
-        {/* Popular Destinations */}
-        <View className="px-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xl font-bold text-slate-900">Populer Untukmu</Text>
+        {/* Recent Trip Section */}
+        {recentTrips.length > 0 && (
+          <View className="mt-6 px-6">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-xl font-bold text-slate-900">Recent Trip</Text>
+              <TouchableOpacity onPress={() => router.push("/tickets")}>
+                <Text className="text-primary font-semibold">See All</Text>
+              </TouchableOpacity>
+            </View>
+            {recentTrips.map((trip) => (
+              <RecentTripCard key={trip.id} trip={trip} />
+            ))}
+          </View>
+        )}
+
+        {/* Popular Destinations Section */}
+        <View className="mt-6 px-6">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-xl font-bold text-slate-900">Popular Destinations</Text>
+            <TouchableOpacity onPress={() => router.push("/category/1")}>
+              <Text className="text-primary font-semibold">See All</Text>
+            </TouchableOpacity>
           </View>
 
           {filteredDestinations.length > 0 ? (
@@ -115,11 +120,7 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-
-        {/* Padding bottom for scroll */}
-        <View className="h-10" />
       </ScrollView>
-
     </SafeAreaView>
   );
 }
