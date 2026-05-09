@@ -21,3 +21,8 @@ func GetWisataByID(id string) (models.Wisata, error) {
 	err := config.DB.Preload("Fotos").First(&wisata, id).Error
 	return wisata, err
 }
+
+func CreateWisataFoto(data models.Foto) (error) {
+	err := config.DB.Create(&data).Error
+	return err
+}
