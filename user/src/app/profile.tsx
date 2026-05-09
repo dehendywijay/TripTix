@@ -7,97 +7,158 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { User, Settings, CreditCard, Heart, LogOut, ChevronRight } from "lucide-react-native";
+import {
+  User,
+  Settings,
+  CreditCard,
+  Heart,
+  LogOut,
+  ChevronRight,
+  Star,
+  Backpack,
+} from "lucide-react-native";
+
+const MENU_ITEMS = [
+  { icon: User, label: "Edit Profil", sub: "Ubah foto & informasi", color: "#FF6B5B", route: "/auth/login" },
+  { icon: CreditCard, label: "Metode Pembayaran", sub: "Kelola kartu & dompet digital", color: "#10b981", route: null },
+  { icon: Heart, label: "Destinasi Favorit", sub: "Lihat wishlist destinasimu", color: "#f43f5e", route: "/favorite" },
+  { icon: Settings, label: "Pengaturan", sub: "Notifikasi & preferensi akun", color: "#64748b", route: null },
+];
 
 export default function ProfileScreen() {
   const router = useRouter();
 
-  const menuItems = [
-    { icon: User, label: "Edit Profil", color: "#3b82f6" },
-    { icon: CreditCard, label: "Metode Pembayaran", color: "#10b981" },
-    { icon: Heart, label: "Wishlist Saya", color: "#f43f5e" },
-    { icon: Settings, label: "Pengaturan Akun", color: "#64748b" },
-  ];
-
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <View className="px-6 py-4 bg-white border-b border-slate-100 flex-row justify-between items-center">
-        <Text className="text-2xl font-bold text-slate-900">Profil</Text>
-      </View>
-
-      <ScrollView 
-        className="flex-1 pt-6" 
+      <ScrollView
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        bounces={true}
+        alwaysBounceVertical={true}
       >
-        {/* User Info */}
-        <View className="px-6 items-center mb-8">
-          <View className="w-24 h-24 rounded-full bg-slate-200 border-4 border-white shadow-sm mb-4 overflow-hidden items-center justify-center">
-            {/* Using a placeholder avatar since we don't have one */}
-            <User size={40} color="#94a3b8" />
+        {/* Coral hero header */}
+        <View
+          className="px-6 pt-6 pb-24 items-center"
+          style={{ backgroundColor: "#FF6B5B" }}
+        >
+          <View className="w-full flex-row justify-between items-center mb-8">
+            <Text className="text-white text-2xl font-bold">Profile</Text>
+            <TouchableOpacity
+              className="w-10 h-10 rounded-full items-center justify-center"
+              style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            >
+              <Settings size={20} color="white" />
+            </TouchableOpacity>
           </View>
-          <Text className="text-2xl font-bold text-slate-900 mb-1">Pengguna TripTix</Text>
-          <Text className="text-slate-500">user@triptix.com</Text>
+
+          {/* Avatar */}
+          <View
+            className="w-24 h-24 rounded-full items-center justify-center border-4"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.25)",
+              borderColor: "rgba(255,255,255,0.5)",
+            }}
+          >
+            <User size={40} color="white" />
+          </View>
+
+          <Text className="text-white text-xl font-bold mt-4">Pengguna Viaggio</Text>
+          <Text className="text-white/70 text-sm mt-1">user@example.com</Text>
 
           <TouchableOpacity
-            className="mt-4 px-6 py-2 bg-slate-100 rounded-full"
+            className="mt-4 px-6 py-2 rounded-full border border-white/40"
+            style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
             onPress={() => router.push("/auth/login")}
           >
-            <Text className="text-slate-700 font-semibold">Ubah Profil</Text>
+            <Text className="text-white font-semibold text-sm">Edit Profil</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Stats */}
-        <View className="px-6 flex-row justify-between mb-8">
-          <View className="bg-white flex-1 p-4 rounded-2xl items-center border border-slate-100 shadow-sm mr-2">
-            <Text className="text-2xl font-bold text-primary mb-1">12</Text>
-            <Text className="text-slate-500 text-xs text-center">Destinasi Dikunjungi</Text>
-          </View>
-          <View className="bg-white flex-1 p-4 rounded-2xl items-center border border-slate-100 shadow-sm ml-2">
-            <Text className="text-2xl font-bold text-secondary mb-1">5</Text>
-            <Text className="text-slate-500 text-xs text-center">Ulasan Diberikan</Text>
+        {/* Stats card — overlaps hero */}
+        <View className="px-6 -mt-14 mb-6 z-10">
+          <View
+            className="bg-white rounded-3xl px-6 py-5 flex-row justify-between items-center border border-slate-100"
+            style={{ shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 12 }}
+          >
+            <View className="items-center flex-1">
+              <View className="w-10 h-10 rounded-2xl bg-primary/10 items-center justify-center mb-2">
+                <Backpack size={18} color="#FF6B5B" />
+              </View>
+              <Text className="text-xl font-bold text-slate-900">12</Text>
+              <Text className="text-slate-400 text-xs text-center mt-0.5">Trip{"\n"}Selesai</Text>
+            </View>
+
+            <View className="w-px h-14 bg-slate-100" />
+
+            <View className="items-center flex-1">
+              <View className="w-10 h-10 rounded-2xl bg-amber-50 items-center justify-center mb-2">
+                <Star size={18} color="#f59e0b" />
+              </View>
+              <Text className="text-xl font-bold text-slate-900">5</Text>
+              <Text className="text-slate-400 text-xs text-center mt-0.5">Ulasan{"\n"}Diberikan</Text>
+            </View>
+
+            <View className="w-px h-14 bg-slate-100" />
+
+            <View className="items-center flex-1">
+              <View className="w-10 h-10 rounded-2xl bg-rose-50 items-center justify-center mb-2">
+                <Heart size={18} color="#f43f5e" />
+              </View>
+              <Text className="text-xl font-bold text-slate-900">3</Text>
+              <Text className="text-slate-400 text-xs text-center mt-0.5">Favorit{"\n"}Tersimpan</Text>
+            </View>
           </View>
         </View>
 
         {/* Menu */}
-        <View className="bg-white px-6 py-2 border-y border-slate-100">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <TouchableOpacity
-                key={index}
-                className={`flex-row items-center justify-between py-4 ${index !== menuItems.length - 1 ? "border-b border-slate-50" : ""
+        <View className="px-6 mb-6">
+          <Text className="text-slate-500 font-semibold text-xs uppercase tracking-wider mb-3 ml-1">
+            Akun
+          </Text>
+          <View className="bg-white rounded-3xl border border-slate-100 overflow-hidden"
+                style={{ shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
+            {MENU_ITEMS.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  className={`flex-row items-center px-5 py-4 ${
+                    index !== MENU_ITEMS.length - 1 ? "border-b border-slate-50" : ""
                   }`}
-              >
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: `${item.color}15` }}>
+                  onPress={() => item.route && router.push(item.route as any)}
+                >
+                  <View
+                    className="w-11 h-11 rounded-2xl items-center justify-center mr-4"
+                    style={{ backgroundColor: `${item.color}15` }}
+                  >
                     <Icon size={20} color={item.color} />
                   </View>
-                  <Text className="text-slate-700 font-medium text-base ml-3">{item.label}</Text>
-                </View>
-                <ChevronRight size={20} color="#cbd5e1" />
-              </TouchableOpacity>
-            );
-          })}
+                  <View className="flex-1">
+                    <Text className="text-slate-800 font-semibold text-base">{item.label}</Text>
+                    <Text className="text-slate-400 text-xs mt-0.5">{item.sub}</Text>
+                  </View>
+                  <ChevronRight size={18} color="#cbd5e1" />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         {/* Logout */}
-        <View className="px-6 py-8 pb-20">
-          <TouchableOpacity 
-            className="bg-red-50 py-4 rounded-2xl flex-row items-center justify-center"
+        <View className="px-6">
+          <TouchableOpacity
+            className="bg-red-50 py-4 rounded-2xl flex-row items-center justify-center border border-red-100"
             onPress={() => router.push("/auth/login")}
           >
-            <LogOut size={20} color="#ef4444" />
-            <Text className="text-red-500 font-bold ml-2">Keluar Akun</Text>
+            <LogOut size={18} color="#ef4444" />
+            <Text className="text-red-500 font-bold ml-2">Keluar dari Akun</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-
     </SafeAreaView>
   );
 }

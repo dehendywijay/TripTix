@@ -129,7 +129,7 @@ export default function CheckoutScreen() {
                 }`}
               >
                 <Text className="text-slate-700 font-medium">{method}</Text>
-                {selectedPayment === method && <CheckCircle2 size={20} color="#0ea5e9" />}
+                {selectedPayment === method && <CheckCircle2 size={20} color="#FF6B5B" />}
               </TouchableOpacity>
             ))}
           </View>

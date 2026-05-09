@@ -11,7 +11,7 @@ import { Image } from "expo-image";
 import { QrCode, MapPin, CalendarDays } from "lucide-react-native";
 import { destinations } from "../data/destinations";
 
-export default function TicketsScreen() {
+export default function MyTripScreen() {
   const [activeTab, setActiveTab] = useState("Aktif");
   const sampleTicket = destinations[0];
 
@@ -21,16 +21,16 @@ export default function TicketsScreen() {
 
       {/* Header */}
       <View className="px-6 py-4 bg-white border-b border-slate-100">
-        <Text className="text-2xl font-bold text-slate-900">Tiket Saya</Text>
+        <Text className="text-2xl font-bold text-slate-900">My Trip</Text>
       </View>
 
       {/* Tabs */}
-      <View className="flex-row px-6 pt-4 pb-2">
+      <View className="flex-row px-6 pt-4 pb-2 bg-white border-b border-slate-50">
         {["Aktif", "Riwayat"].map((tab) => (
           <TouchableOpacity
             key={tab}
             onPress={() => setActiveTab(tab)}
-            className={`mr-4 pb-2 border-b-2 ${
+            className={`mr-6 pb-2 border-b-2 ${
               activeTab === tab ? "border-primary" : "border-transparent"
             }`}
           >
@@ -46,15 +46,13 @@ export default function TicketsScreen() {
       </View>
 
       <View className="flex-1 px-6 pt-4">
-        <ScrollView 
-          showsVerticalScrollIndicator={true}
-          scrollEnabled={true}
-          alwaysBounceVertical={true}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 120 }}
         >
           {activeTab === "Aktif" ? (
             <View className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-6">
-              <View className="relative h-32">
+              <View className="relative h-36">
                 <Image
                   source={{ uri: sampleTicket.image }}
                   className="w-full h-full"
@@ -84,7 +82,9 @@ export default function TicketsScreen() {
                   <Text className="text-slate-400 text-xs mb-1">Lokasi</Text>
                   <View className="flex-row items-center">
                     <MapPin size={14} color="#64748b" />
-                    <Text className="text-slate-700 font-medium ml-1">{sampleTicket.location}</Text>
+                    <Text className="text-slate-700 font-medium ml-1">
+                      {sampleTicket.location}
+                    </Text>
                   </View>
                 </View>
 
@@ -94,12 +94,11 @@ export default function TicketsScreen() {
                     <Text className="text-slate-900 font-bold">TRX-82910</Text>
                   </View>
                   <TouchableOpacity className="bg-primary/10 px-4 py-2 rounded-xl flex-row items-center">
-                    <QrCode size={16} color="#0ea5e9" />
+                    <QrCode size={16} color="#FF6B5B" />
                     <Text className="text-primary font-bold ml-2">Lihat QR</Text>
                   </TouchableOpacity>
                 </View>
-                
-                {/* Ticket cutouts for realistic effect */}
+
                 <View className="absolute left-[-10px] bottom-[70px] w-5 h-5 bg-background rounded-full" />
                 <View className="absolute right-[-10px] bottom-[70px] w-5 h-5 bg-background rounded-full" />
               </View>
@@ -111,7 +110,6 @@ export default function TicketsScreen() {
           )}
         </ScrollView>
       </View>
-
     </SafeAreaView>
   );
 }
