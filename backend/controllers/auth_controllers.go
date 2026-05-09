@@ -62,7 +62,7 @@ func LoginUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	email := c.Query("email")
+	email := c.Param("email")
 
 	if email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
