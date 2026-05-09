@@ -6,7 +6,6 @@ type Wisata struct {
 	gorm.Model
 	Nama    string `json:"nama" gorm:"not null"`
 	Alamat  string `json:"alamat" gorm:"not null"`
-	Foto    string `json:"foto" gorm:"not null"`
 	Deskripsi string `json:"deskripsi" gorm:"not null"`
 	Durasi int `json:"durasi" gorm:"not null"`
 	Jenis string `json:"jenis" gorm:"not null"`
