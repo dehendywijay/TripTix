@@ -14,7 +14,7 @@ import KategoriList from "../components/KategoriList";
 import RecentTripCard from "../components/RecentTripCard";
 import {  categories, recentTrips } from "../data/destinations";
 import { useRouter } from "expo-router";
-import { useWisata } from "@/hook/useWisata";
+import { useWisata } from "@/hook/wisata/useWisata";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -117,7 +117,7 @@ export default function HomeScreen() {
 
           {filteredDestinations.length > 0 ? (
             filteredDestinations.map((item) => (
-              <DestinasiCard key={item.id} destination={item as any} />
+              <DestinasiCard key={item.ID} destination={item as any} />
             ))
           ) : (
             <View className="py-10 items-center justify-center">
