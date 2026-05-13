@@ -4,9 +4,10 @@ import { Image } from "expo-image";
 import { Star, MapPin, Heart } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { Destination } from "../data/destinations";
+import { Wisata, WisataResponse } from "@/type/wisata";
 
 interface DestinasiCardProps {
-  destination: Destination;
+  destination: Wisata;
   horizontal?: boolean;
 }
 
@@ -22,16 +23,14 @@ export default function DestinasiCard({ destination, horizontal }: DestinasiCard
     >
       <View className="relative">
         <Image
-          source={{ uri: destination.image }}
+          source={{ uri: destination.foto }}
           className="w-full h-52"
           contentFit="cover"
           transition={500}
         />
-        {destination.recommended && (
           <View className="absolute top-3 left-3 bg-primary px-3 py-1 rounded-full">
-            <Text className="text-white text-xs font-bold">Recommended</Text>
+            <Text className="text-white text-xs font-bold">{destination.kategori}</Text>
           </View>
-        )}
         <TouchableOpacity
           onPress={() => setIsFavorite(!isFavorite)}
           className="absolute top-3 right-3 w-9 h-9 bg-white/90 rounded-full items-center justify-center"
@@ -47,17 +46,17 @@ export default function DestinasiCard({ destination, horizontal }: DestinasiCard
       <View className="bg-white px-4 py-3 border-x border-b border-slate-100 rounded-b-3xl">
         <View className="flex-row justify-between items-center">
           <Text className="text-base font-bold text-slate-900 flex-1 mr-2" numberOfLines={1}>
-            {destination.name}
+            {destination.nama}
           </Text>
           <View className="flex-row items-center">
             <Star size={14} color="#f59e0b" fill="#f59e0b" />
-            <Text className="text-slate-700 font-semibold text-sm ml-1">{destination.rating}</Text>
+            <Text className="text-slate-700 font-semibold text-sm ml-1">{destination.harga}</Text>
           </View>
         </View>
         <View className="flex-row items-center mt-1">
           <MapPin size={13} color="#94a3b8" />
           <Text className="text-slate-400 text-sm ml-1" numberOfLines={1}>
-            {destination.location}
+            {destination.alamat}
           </Text>
         </View>
       </View>

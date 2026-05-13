@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import {
   View,
@@ -16,19 +18,21 @@ import {
   MapPin,
   DollarSign,
 } from "lucide-react-native";
-import { destinations } from "../../data/destinations";
+import { useWisatabyId } from "@/hook/wisata/useWisataById";
+
+
 
 export default function DestinationDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const destination = destinations.find((d) => d.id === id);
   const [isFavorite, setIsFavorite] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const {wisata, loading, error, refetch} = useWisatabyId(id as string);
+  console.log( wisata?.Fotos?.[2]?.url);
 
-  if (!destination) return null;
 
-  const shortDesc = destination.description.slice(0, 100);
-  const isLong = destination.description.length > 100;
+  const shortDesc = wisata?.deskripsi.slice(0, 100);
+  const isLong = (wisata?.deskripsi?.length ?? 0) > 100;
 
   return (
     <View className="flex-1 bg-white">
@@ -37,7 +41,7 @@ export default function DestinationDetails() {
       {/* Hero Image */}
       <View className="relative h-[380px]">
         <Image
-          source={{ uri: destination.image }}
+          source={{ uri:  wisata?.Fotos?.[2]?.url }}
           className="w-full h-full rounded-b-[36px]"
           contentFit="cover"
         />
@@ -76,31 +80,31 @@ export default function DestinationDetails() {
       >
         <View className="px-6 pt-6">
           {/* Title */}
-          <Text className="text-3xl font-bold text-slate-900">{destination.name}</Text>
+          <Text className="text-3xl font-bold text-slate-900">{wisata?.nama}</Text>
 
           {/* Rating + Distance */}
           <View className="flex-row items-center mt-2 flex-wrap gap-x-3">
             <View className="flex-row items-center">
               <Star size={16} color="#f59e0b" fill="#f59e0b" />
               <Text className="text-slate-700 font-semibold ml-1">
-                {destination.rating}/5
+                5
               </Text>
               <Text className="text-slate-400 ml-1 text-sm">(Google Reviews)</Text>
             </View>
-            {destination.distance && (
+            {/* {destination.distance && (
               <View className="flex-row items-center">
                 <Text className="text-slate-300 mr-2">•</Text>
                 <Text className="text-slate-500 text-sm">
                   📏 {destination.distance}
                 </Text>
               </View>
-            )}
+            )} */}
           </View>
 
           {/* Description */}
           <View className="mt-5">
             <Text className="text-slate-500 leading-6 text-base">
-              {expanded || !isLong ? destination.description : shortDesc + "..."}
+              {expanded || !isLong ? wisata?.deskripsi : shortDesc + "..."}
             </Text>
             {isLong && (
               <TouchableOpacity onPress={() => setExpanded(!expanded)}>
@@ -118,7 +122,7 @@ export default function DestinationDetails() {
             </View>
             <View className="flex-1">
               <Text className="text-slate-400 text-xs mb-0.5">Lokasi</Text>
-              <Text className="text-slate-900 font-semibold">{destination.location}</Text>
+              <Text className="text-slate-900 font-semibold">{wisata?.alamat}</Text>
             </View>
           </View>
 
@@ -130,11 +134,11 @@ export default function DestinationDetails() {
             <View className="flex-1">
               <Text className="text-slate-400 text-xs mb-0.5">Harga Tiket</Text>
               <Text className="text-slate-900 font-semibold">
-                {destination.price === 0
+                {wisata?.harga === 0
                   ? "Gratis"
-                  : `Rp ${destination.price.toLocaleString("id-ID")}`}
+                  : `Rp ${wisata?.harga.toLocaleString("id-ID")}`}
               </Text>
-              {destination.price > 0 && (
+              {(wisata?.harga ?? 0) > 0 && (
                 <Text className="text-slate-400 text-xs">per orang • IDR</Text>
               )}
             </View>
@@ -144,7 +148,7 @@ export default function DestinationDetails() {
           <TouchableOpacity
             className="bg-primary mt-8 py-4 rounded-2xl items-center shadow-lg"
             style={{ shadowColor: "#FF6B5B", shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } }}
-            onPress={() => router.push(`/checkout/${destination.id}`)}
+            onPress={() => router.push(`/checkout/${wisata?.ID}`)}
           >
             <Text className="text-white font-bold text-lg">Mulai Perjalanan</Text>
           </TouchableOpacity>

@@ -12,20 +12,25 @@ import { Search, Bell, User } from "lucide-react-native";
 import DestinasiCard from "../components/DestinasiCard";
 import KategoriList from "../components/KategoriList";
 import RecentTripCard from "../components/RecentTripCard";
-import { destinations, categories, recentTrips } from "../data/destinations";
+import {  categories, recentTrips } from "../data/destinations";
 import { useRouter } from "expo-router";
+import { useWisata } from "@/hook/wisata/useWisata";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [selectedKategori, setSelectedKategori] = useState("1");
   const [searchQuery, setSearchQuery] = useState("");
+  const { wisata, loading, error, refetch } = useWisata();
+
+  if (loading) return <Text>Loading...</Text>;
+  if (error) return <Text>{error}</Text>;
 
   const selectedCategoryObj = categories.find((c) => c.id === selectedKategori);
 
-  const filteredDestinations = destinations.filter((item) => {
+  const filteredDestinations = wisata.filter((item) => {
     const matchesKategori =
-      selectedKategori === "1" || item.category === selectedCategoryObj?.name;
-    const matchesSearch = item.name
+      selectedKategori === "1" || item.kategori === selectedCategoryObj?.name;
+    const matchesSearch = item.nama
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     return matchesKategori && matchesSearch;
@@ -112,7 +117,7 @@ export default function HomeScreen() {
 
           {filteredDestinations.length > 0 ? (
             filteredDestinations.map((item) => (
-              <DestinasiCard key={item.id} destination={item} />
+              <DestinasiCard key={item.ID} destination={item as any} />
             ))
           ) : (
             <View className="py-10 items-center justify-center">
