@@ -3,7 +3,7 @@ import { Wisata } from "@/type/wisata";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export const useAlumni = () => {
+export const useWisata = () => {
   const [wisata, setAlumni] = useState<Wisata[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
