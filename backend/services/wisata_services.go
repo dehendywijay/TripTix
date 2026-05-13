@@ -57,7 +57,7 @@ func UpdateWisataFoto(data models.Foto, id string) error {
 func GetFotoWisata(id string, idfoto string) (models.Foto, error){
 	var fotos models.Foto
 
-	err := config.DB.Where("wisata_id = ?", id).Find(fotos, idfoto).Error
+	err := config.DB.Where("wisata_id = ?", id).Find(&fotos, idfoto).Error
 	return fotos, err
 }
 
