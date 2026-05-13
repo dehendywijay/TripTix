@@ -48,10 +48,15 @@ func CreateWisataFoto(data models.Foto) error {
 	return err
 }
 
-func GetFotoWisata(id string) ([]models.Foto, error){
-	var fotos []models.Foto
+func UpdateWisataFoto(data models.Foto, id string) error {
+	err := config.DB.Model(&data).Where("ID = ?", id).Updates(data).Error
+	return err
+}
 
-	err := config.DB.Where("wisata_id = ?", id).Find(&fotos).Error
+func GetFotoWisata(id string, idfoto string) (models.Foto, error){
+	var fotos models.Foto
+
+	err := config.DB.Where("wisata_id = ?", id).Find(fotos, idfoto).Error
 	return fotos, err
 }
 

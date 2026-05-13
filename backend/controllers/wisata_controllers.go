@@ -66,21 +66,122 @@ func CreateWisata(c *gin.Context) {
 		}
 		foto := models.Foto{
 			WisataID: result.ID,
-			URL: publicURL,
+			URL:      publicURL,
 		}
 		if err := services.CreateWisataFoto(foto); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return 
+			return
 		}
-		
+
 	}
 
-	
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Data wisata berhasil dibuat",
 		"data":    result,
 	})
 
+}
+
+func EditWisata(c *gin.Context) {
+	id := c.Param("id")
+	idFoto := c.PostForm("id_foto")
+	nama := c.PostForm("nama")
+	alamat := c.PostForm("alamat")
+	deskripsi := c.PostForm("deskripsi")
+	durasi := c.PostForm("durasi")
+	jenis := c.PostForm("jenis")
+	harga := c.PostForm("harga")
+	kategori := c.PostForm("kategori")
+
+	// form, err := c.MultipartForm()
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "S"})
+	// 	return
+	// }
+
+	// files := form.File["fotos"]
+	durasii, _ := strconv.Atoi(durasi)
+	idd, _ := strconv.Atoi(id)
+	hargaa, _ := strconv.Atoi(harga)
+
+	if nama == "" || alamat == "" || deskripsi == "" || durasi == "" || jenis == "" || harga == "" || kategori == "" {
+
+	}
+
+	wisata := models.Wisata{
+		Nama:      nama,
+		Alamat:    alamat,
+		Deskripsi: deskripsi,
+		Durasi:    durasii,
+		Jenis:     jenis,
+		Harga:     hargaa,
+		Kategori:  kategori,
+	}
+
+	fileEdit, _ := c.FormFile("fotoEdit")
+	if fileEdit != nil {
+		oldObjectPath, err := services.GetFotoWisata(id, idFoto)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		oldFoto := utils.ExtractObjectPath(oldObjectPath.URL, "wisata_image")
+		FileBytes, ObjectPath, contentType, err := utils.ProcessImageUploadUpdate(c, "fotoEdit")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		publicURL, err := storage.UpdateSupabaseFile("wisata_image", oldFoto, ObjectPath, contentType, FileBytes)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		foto := models.Foto{
+			URL:      publicURL,
+		}
+
+		
+		if err := services.UpdateWisataFoto(foto, idFoto); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+		form, err := c.MultipartForm()
+		if err == nil {
+		files := form.File["fotos"]
+
+		for _, file := range files {
+			fileBytes, objectPath, contentType, err := utils.ProcessImageUpload(file)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			publicURL, err := storage.UploadToSupabase("wisata_image", objectPath, contentType, fileBytes)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			foto := models.Foto{
+				WisataID: uint(idd),
+				URL:      publicURL,
+			}
+			if err := services.CreateWisataFoto(foto); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+		}
+	}
+	
+	_ , err = services.EditWisata(id, wisata)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 }
 
 func GetAllWisata(c *gin.Context) {
