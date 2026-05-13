@@ -12,6 +12,7 @@ func WisataRoute(r *gin.Engine) {
 		wisata.POST("", controller.CreateWisata)
 		wisata.GET("", controller.GetAllWisata)
 		wisata.GET("/:id", controller.GetWisataByID)
+		wisata.PUT("/:id", controller.EditWisata)
 	}
 
 }
