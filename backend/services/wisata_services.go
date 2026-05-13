@@ -19,6 +19,7 @@ func GetAllWisata() ([]dto.AllWisataResponse, error) {
 	err := config.DB.
 		Table("wisata").
 		Select(`
+			wisata.id,
 			wisata.nama,
 			wisata.alamat,
 			wisata.harga,
