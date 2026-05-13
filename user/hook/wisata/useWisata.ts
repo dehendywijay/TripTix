@@ -1,5 +1,5 @@
 import { api_wisata } from "@/constans/strings";
-import { Wisata, WisataResponse } from "@/type/wisata";
+import { Wisata } from "@/type/wisata";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -10,9 +10,9 @@ export const useWisata = () => {
 
   const fecthWisata = async () => {
     try {
-      const data = await axios.get<WisataResponse>(`${api_wisata}`).then((res) => res.data.data);
+      const data = await axios.get(`${api_wisata}`).then((res) => res.data.data);
       setWisata(data);
-    } catch (error) {
+    } catch (error) { 
       console.error(error);
       setError("Gagal Mengambil Data Wisata.");
     } finally {
