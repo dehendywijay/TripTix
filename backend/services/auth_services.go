@@ -100,3 +100,7 @@ func GetRefreshToken(hash string) (models.RefreshToken, error) {
 	err := config.DB.Where("token_hash = ? AND revoked = false", hash).First(&refreshToken).Error
 	return refreshToken, err
 }
+
+func RevokeRefreshToken(hash string) error {
+	return config.DB.Model(&models.RefreshToken{}).Where("token_hash = ?", hash).Update("revoked", true).Error
+}
