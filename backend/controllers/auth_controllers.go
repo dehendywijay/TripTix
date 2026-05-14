@@ -4,10 +4,8 @@ import (
 	"net/http"
 	"triptix/dto"
 	"triptix/models"
-	"triptix/repository"
 	"triptix/services"
 
-	"triptix/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -64,19 +62,10 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	refreshTokenHash := utils.HashToken(req.RefreshToken)
-	valid, err := repository.GetRefreshToken(refreshTokenHash)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "refresh token tidak valid",
-		})
-		return
-	}
-
-	accesToken , err := utils.GenerateAccessToken(valid.UserID)
+	accesToken, err := services.RefreshToken(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Access Token",
+			"error": "Refresh token gagal",
 		})
 		return
 	}
@@ -91,7 +80,6 @@ func RefreshToken(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
-
 	var req dto.RefreshTokenRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -101,16 +89,13 @@ func LogoutUser(c *gin.Context) {
 		return
 	}
 
-	hashedToken := utils.HashToken(req.RefreshToken)
-
-	err := repository.RevokeRefreshToken(hashedToken)
+	err := services.LogoutUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "logout gagal",
 		})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"message": "logout berhasil",
 	})
@@ -127,10 +112,10 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := repository.GetUser(email)
+	user, err := services.GetUser(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Email tidak ditemukan",
+			"error": err.Error(),
 		})
 		return
 	}

@@ -1,14 +1,13 @@
 package services
 
 import (
-	// "net/http"
-	// "triptix/dto"
+	
 	"triptix/dto"
 	"triptix/models"
 	"triptix/repository"
 
 	"triptix/utils"
-	// "github.com/gin-gonic/gin"
+
 )
 
 func RegisterUser(user models.User) (models.User, error) {
@@ -43,7 +42,7 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
-	
+
 	_ , err = repository.CreateRefreshToken(result.ID, refreshTokenHash)
 	if err != nil {
 		return dto.LoginRespone{}, err
@@ -57,4 +56,37 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 	}
 
 	return data, nil
+}
+
+func RefreshToken(req dto.RefreshTokenRequest) (string, error) {
+	refreshTokenHash := utils.HashToken(req.RefreshToken)
+	valid, err := repository.GetRefreshToken(refreshTokenHash)
+	if err != nil {
+		return " ", err
+	}
+
+	accesToken , err := utils.GenerateAccessToken(valid.UserID)
+	if err != nil {
+		return " ", err
+	}
+
+	return accesToken, nil
+}
+
+func LogoutUser(req dto.RefreshTokenRequest) error {
+	hashedToken := utils.HashToken(req.RefreshToken)
+	err := repository.RevokeRefreshToken(hashedToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetUser(email string) (dto.ReviewsByUserResponse, error) {
+	result, err := repository.GetUser(email)
+	if err != nil {
+		return dto.ReviewsByUserResponse{}, err
+	}
+	return result, nil
 }
