@@ -5,6 +5,7 @@ import (
 	"triptix/dto"
 	"triptix/models"
 	"triptix/repository"
+	"triptix/services"
 
 	"triptix/utils"
 
@@ -18,7 +19,7 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	user, err := repository.RegisterUser(user)
+	user, err := services.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -31,10 +32,7 @@ func RegisterUser(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var req dto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -43,45 +41,12 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	user, err := repository.LoginUser(req.Email, req.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Password atau email Salah",
-		})
-		return
-	}
-
-	refreshTokenValue, err := utils.GenerateRefreshToken()
+	data, err := services.LoginUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Refresh Token",
+			"error": "Login gagal",
 		})
 		return
-	}
-
-	refreshTokenHash := utils.HashToken(refreshTokenValue)
-
-	token, err := utils.GenerateAccessToken(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Refresh Token",
-		})
-		return
-	}
-
-	_ , err = repository.CreateRefreshToken(user.ID, refreshTokenHash)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal membuat refresh token",
-		})
-		return
-	}
-
-	data := dto.LoginRespone{
-		ID:            user.ID,
-		Email:         user.Email,
-		RefreshToken:  refreshTokenValue,
-		AccesToken:    token,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
