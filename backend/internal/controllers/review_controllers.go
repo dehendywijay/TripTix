@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"triptix/dto"
-	"triptix/services"
+	"triptix/internal/dto"
+	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
 )

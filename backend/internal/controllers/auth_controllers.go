@@ -2,10 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"triptix/dto"
-	"triptix/models"
-	"triptix/services"
-
+	"triptix/internal/dto"
+	"triptix/internal/models"
+	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,7 +48,7 @@ func LoginUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
-		"data":    data ,
+		"data":    data,
 	})
 }
 
@@ -101,7 +100,6 @@ func LogoutUser(c *gin.Context) {
 	})
 }
 
-
 func GetUser(c *gin.Context) {
 	email := c.Param("email")
 
@@ -124,5 +122,3 @@ func GetUser(c *gin.Context) {
 		"data": user,
 	})
 }
-
-

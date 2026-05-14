@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 	"triptix/config"
-	"triptix/middleware"
-	"triptix/models"
+	"triptix/internal/middleware"
+	"triptix/internal/models"
 	"triptix/routes"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ func main() {
 	r.Use(middleware.CORSMiddleware())
 	
 	config.ConnectDB()
-	config.DB.AutoMigrate(&models.Wisata{}, &models.User{}, &models.Foto{}, &models.Review{}, &models.RefreshToken{})
+	config.DB.AutoMigrate(&models.Wisata{}, &models.User{}, &models.Foto{}, &models.Review{},)
 
 	routes.WisataRoute(r)
 	routes.UserRoute(r)

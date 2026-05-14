@@ -4,9 +4,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
-	"triptix/models"
-	"triptix/repository"
-	"triptix/services"
+	"triptix/internal/models"
+	"triptix/internal/repository"
+	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
 )

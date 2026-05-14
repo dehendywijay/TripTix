@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 	"triptix/config"
-	"triptix/models"
+	"triptix/internal/models"
 
 	"gorm.io/gorm"
 )
