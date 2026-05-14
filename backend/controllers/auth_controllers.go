@@ -89,6 +89,41 @@ func LoginUser(c *gin.Context) {
 	})
 }
 
+func RefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Refresh token tidak ditemukan",
+		})
+		return
+	}
+
+	refreshTokenHash := utils.HashToken(refreshToken)
+	valid, err := services.GetRefreshToken(refreshTokenHash)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "refresh token tidak valid",
+		})
+		return
+	}
+
+	accesToken , err := utils.GenerateAccessToken(valid.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal Generate Access Token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Refresh token valid",
+		"data": gin.H{
+			"access_token": accesToken,
+		},
+	})
+
+}
+
 
 func GetUser(c *gin.Context) {
 	email := c.Param("email")
@@ -112,3 +147,5 @@ func GetUser(c *gin.Context) {
 		"data": user,
 	})
 }
+
+
