@@ -1,11 +1,13 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"triptix/dto"
 	"triptix/models"
 	"triptix/services"
 	"triptix/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterUser(c *gin.Context) {
@@ -65,6 +67,14 @@ func LoginUser(c *gin.Context) {
 
 	refreshTokenHash := utils.HashToken(refreshTokenValue)
 
+	token, err := utils.GenerateAccessToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal Generate Refresh Token",
+		})
+		return
+	}
+
 	_ , err = services.CreateRefreshToken(user.ID, refreshTokenHash)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -73,32 +83,29 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(
-		"refresh_token",
-		refreshTokenValue,
-		7*24*60*60, 
-		"/",
-		"",
-		false, 
-		true,  
-	)
+	data := dto.LoginRespone{
+		ID:            user.ID,
+		Email:         user.Email,
+		RefreshToken:  refreshTokenValue,
+		AccesToken:    token,
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
-		"data":    user,
+		"data":    data ,
 	})
 }
 
 func RefreshToken(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Refresh token tidak ditemukan",
+	var req dto.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Data tidak ditemukan",
 		})
 		return
 	}
 
-	refreshTokenHash := utils.HashToken(refreshToken)
+	refreshTokenHash := utils.HashToken(req.RefreshToken)
 	valid, err := services.GetRefreshToken(refreshTokenHash)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
