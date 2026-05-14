@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"triptix/dto"
 	"triptix/models"
-	"triptix/services"
+	"triptix/repository"
+
 	"triptix/utils"
 
 	"github.com/gin-gonic/gin"
@@ -17,21 +18,14 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(user.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	user.Password = hashedPassword
-	user, err = services.RegisterUser(user)
+	user, err := repository.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User created successfully",
+		"message": "Akun Berhasil Dibuat",
 		"data":    user,
 	})
 }
@@ -49,7 +43,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	user, err := services.LoginUser(req.Email, req.Password)
+	user, err := repository.LoginUser(req.Email, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Password atau email Salah",
@@ -75,7 +69,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	_ , err = services.CreateRefreshToken(user.ID, refreshTokenHash)
+	_ , err = repository.CreateRefreshToken(user.ID, refreshTokenHash)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Gagal membuat refresh token",
@@ -106,7 +100,7 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	refreshTokenHash := utils.HashToken(req.RefreshToken)
-	valid, err := services.GetRefreshToken(refreshTokenHash)
+	valid, err := repository.GetRefreshToken(refreshTokenHash)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "refresh token tidak valid",
@@ -144,7 +138,7 @@ func LogoutUser(c *gin.Context) {
 
 	hashedToken := utils.HashToken(req.RefreshToken)
 
-	err := services.RevokeRefreshToken(hashedToken)
+	err := repository.RevokeRefreshToken(hashedToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "logout gagal",
@@ -168,7 +162,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := services.GetUser(email)
+	user, err := repository.GetUser(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Email tidak ditemukan",
