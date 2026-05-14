@@ -55,11 +55,40 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
+	refreshTokenValue, err := utils.GenerateRefreshToken()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal Generate Refresh Token",
+		})
+		return
+	}
+
+	refreshTokenHash := utils.HashToken(refreshTokenValue)
+
+	_ , err = services.CreateRefreshToken(user.ID, refreshTokenHash)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Gagal membuat refresh token",
+		})
+		return
+	}
+
+	c.SetCookie(
+		"refresh_token",
+		refreshTokenValue,
+		7*24*60*60, 
+		"/",
+		"",
+		true, 
+		true,  
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"data":    user,
 	})
 }
+
 
 func GetUser(c *gin.Context) {
 	email := c.Param("email")
