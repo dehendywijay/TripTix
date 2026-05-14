@@ -3,8 +3,8 @@ package repository
 import (
 	"fmt"
 	"triptix/config"
-	"triptix/dto"
-	"triptix/models"
+	"triptix/internal/dto"
+	"triptix/internal/models"
 )
 
 func CreateWisata(data models.Wisata) (models.Wisata, error) {

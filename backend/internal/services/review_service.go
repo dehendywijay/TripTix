@@ -2,9 +2,9 @@ package services
 
 import (
 	"fmt"
-	"triptix/dto"
-	"triptix/models"
-	"triptix/repository"
+	"triptix/internal/dto"
+	"triptix/internal/models"
+	"triptix/internal/repository"
 )
 
 func CreateReview(

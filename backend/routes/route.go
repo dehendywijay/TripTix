@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"triptix/controllers"
+	"triptix/internal/controllers"
 
 	"github.com/gin-gonic/gin"
 )

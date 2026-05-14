@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 	"triptix/config"
-	"triptix/dto"
-	"triptix/models"
-	"triptix/utils"
+	"triptix/internal/dto"
+	"triptix/internal/models"
+	"triptix/pkg/utils"
 
 	"gorm.io/gorm"
 )
@@ -30,7 +30,7 @@ func LoginUser(email string, password string) (models.User, error) {
 	return user, err
 }
 
-func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
+func GetUser(email string) (dto.ReviewsByUserResponse, error) {
 	var user models.User
 	err := config.DB.
 		Select("id", "nama").
@@ -75,13 +75,12 @@ func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
 	return response, nil
 }
 
-
 func CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
 	refreshToken := models.RefreshToken{
-		UserID: id, 
+		UserID:    id,
 		TokenHash: hash,
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
-	 }
+	}
 	err := config.DB.Create(&refreshToken).Error
 	return refreshToken, err
 }

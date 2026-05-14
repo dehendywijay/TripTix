@@ -1,13 +1,12 @@
 package services
 
 import (
-	
-	"triptix/dto"
-	"triptix/models"
-	"triptix/repository"
+	"triptix/internal/dto"
+	"triptix/internal/models"
+	"triptix/internal/repository"
 
-	"triptix/utils"
-
+	"triptix/pkg/jwt"
+	"triptix/pkg/utils"
 )
 
 func RegisterUser(user models.User) (models.User, error) {
@@ -31,14 +30,14 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 		return dto.LoginRespone{}, err
 	}
 
-	refreshTokenValue, err := utils.GenerateRefreshToken()
+	refreshTokenValue, err := jwt.GenerateRefreshToken()
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
 
 	refreshTokenHash := utils.HashToken(refreshTokenValue)
 
-	AccessToken, err := utils.GenerateAccessToken(result.ID)
+	AccessToken, err := jwt.GenerateAccessToken(result.ID)
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
@@ -65,7 +64,7 @@ func RefreshToken(req dto.RefreshTokenRequest) (string, error) {
 		return " ", err
 	}
 
-	accesToken , err := utils.GenerateAccessToken(valid.UserID)
+	accesToken , err := jwt.GenerateAccessToken(valid.UserID)
 	if err != nil {
 		return " ", err
 	}

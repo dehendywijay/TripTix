@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"mime/multipart"
-	"triptix/models"
-	"triptix/repository"
-	"triptix/storage"
-	"triptix/utils"
+	"triptix/internal/models"
+	"triptix/internal/repository"
+	"triptix/pkg/storage"
+	"triptix/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
