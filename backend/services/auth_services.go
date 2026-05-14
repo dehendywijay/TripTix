@@ -16,27 +16,18 @@ func RegisterUser(data models.User) (models.User, error) {
 	return data, err
 }
 
-func LoginUser(email string, password string) (dto.LoginRespone, error) {
+func LoginUser(email string, password string) (models.User, error) {
 	var user models.User
 	err := config.DB.Select("id", "email").Where("email = ?", email).First(&user).Error
 	if err != nil {
-		return dto.LoginRespone{}, err
+		return user, err
 	}
 
 	if !utils.CheckPassword(user.Password, password) {
-		return dto.LoginRespone{}, fmt.Errorf("invalid credentials")
+		return user, fmt.Errorf("invalid credentials")
 	}
 
-	token, err := utils.GenerateAccessToken(user.ID)
-	if err != nil {
-		return dto.LoginRespone{}, err
-	}
-
-	return dto.LoginRespone{
-		ID:    user.ID,
-		Email: user.Email,
-		Token: token,
-	}, nil
+	return user, nil
 }
 
 func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
