@@ -1,74 +1,179 @@
 package services
 
 import (
-	"triptix/config"
-	"triptix/dto"
+	"fmt"
+
+	"mime/multipart"
 	"triptix/models"
+	"triptix/repository"
+	"triptix/storage"
+	"triptix/utils"
 
-
+	"github.com/gin-gonic/gin"
 )
 
-func CreateWisata(data models.Wisata) (models.Wisata, error) {
-	err := config.DB.Create(&data).Error
-	return data, err
-}
-
-func GetAllWisata() ([]dto.AllWisataResponse, error) {
-	var response []dto.AllWisataResponse
-
-	err := config.DB.
-		Table("wisata").
-		Select(`
-			wisata.id,
-			wisata.nama,
-			wisata.alamat,
-			wisata.harga,
-			wisata.kategori,
-			(
-				SELECT fotos.url
-				FROM fotos
-				WHERE fotos.wisata_id = wisata.id
-				ORDER BY fotos.id ASC
-				LIMIT 1
-			) AS foto
-		`).
-		Scan(&response).Error
-
-	return response, err
-}
-
-
-func GetWisataByID(id string) (models.Wisata, error) {
-	var wisata models.Wisata
-	err := config.DB.Preload("Fotos").First(&wisata, id).Error
-	return wisata, err
-}
-
-func CreateWisataFoto(data models.Foto) error {
-	err := config.DB.Create(&data).Error
-	return err
-}
-
-func UpdateWisataFoto(data models.Foto, id string) error {
-	err := config.DB.Model(&data).Where("ID = ?", id).Updates(data).Error
-	return err
-}
-
-func GetFotoWisata(id string, idfoto string) (models.Foto, error){
-	var fotos models.Foto
-
-	err := config.DB.Where("wisata_id = ?", id).Find(&fotos, idfoto).Error
-	return fotos, err
-}
-
-func EditWisata(id string, data models.Wisata) (models.Wisata, error) {
-	var wisata models.Wisata
-
-	err := config.DB.Where("ID = ? ", id).First(&wisata).Error
+func CreateWisata(data models.Wisata, files[] *multipart.FileHeader) (models.Wisata, error) {
+	result, err := repository.CreateWisata(data)
 	if err != nil {
-		return wisata, err
+		return models.Wisata{},
+			fmt.Errorf("membuat wisata: %w", err)
 	}
 
-	err = config.DB.Model(&wisata).Updates(data).Error
-	return wisata, err
+	for _, file := range files {
+		fileBytes, objectPath, contentType, err := utils.ProcessImageUpload(file)
+		if err != nil {
+			return models.Wisata{},
+				fmt.Errorf("process image: %w", err)
+		}
+
+		publicURL, err := storage.UploadToSupabase("wisata_image", objectPath, contentType, fileBytes)
+		if err != nil {
+			return models.Wisata{},
+				fmt.Errorf("upload supabase: %w", err)
+		}
+		foto := models.Foto{
+			WisataID: result.ID,
+			URL:      publicURL,
+		}
+		if err := repository.CreateWisataFoto(foto); err != nil {
+			return models.Wisata{},
+				fmt.Errorf("create wisata foto: %w", err)
+		}
+
+	}
+
+	return result, nil
+
 }
+
+func EditWisata(
+	wisataID uint,
+	idFoto string,
+	wisata models.Wisata,
+	files []*multipart.FileHeader,
+	fileEdit *multipart.FileHeader,
+	c *gin.Context,
+) error {
+
+	_, err := repository.EditWisata(
+		wisataID,
+		wisata,
+	)
+
+	if err != nil {
+		return fmt.Errorf(
+			"update wisata: %w",
+			err,
+		)
+	}
+	if fileEdit != nil {
+
+		oldObjectPath, err := repository.GetFotoWisata(
+			wisataID,
+			idFoto,
+		)
+
+		if err != nil {
+			return fmt.Errorf(
+				"get foto wisata: %w",
+				err,
+			)
+		}
+
+		oldFoto := utils.ExtractObjectPath(
+			oldObjectPath.URL,
+			"wisata_image",
+		)
+
+		fileBytes,
+			objectPath,
+			contentType,
+			err := utils.ProcessImageUploadUpdate(
+			c,
+			"fotoEdit",
+		)
+
+		if err != nil {
+			return fmt.Errorf(
+				"process image update: %w",
+				err,
+			)
+		}
+
+		publicURL, err := storage.UpdateSupabaseFile(
+			"wisata_image",
+			oldFoto,
+			objectPath,
+			contentType,
+			fileBytes,
+		)
+
+		if err != nil {
+			return fmt.Errorf(
+				"update supabase file: %w",
+				err,
+			)
+		}
+
+		foto := models.Foto{
+			URL: publicURL,
+		}
+
+		err = repository.UpdateWisataFoto(
+			foto,
+			idFoto,
+		)
+
+		if err != nil {
+			return fmt.Errorf(
+				"update wisata foto: %w",
+				err,
+			)
+		}
+	}
+
+	for _, file := range files {
+
+		fileBytes,
+			objectPath,
+			contentType,
+			err := utils.ProcessImageUpload(file)
+
+		if err != nil {
+			return fmt.Errorf(
+				"process image: %w",
+				err,
+			)
+		}
+
+		publicURL, err := storage.UploadToSupabase(
+			"wisata_image",
+			objectPath,
+			contentType,
+			fileBytes,
+		)
+
+		if err != nil {
+			return fmt.Errorf(
+				"upload supabase: %w",
+				err,
+			)
+		}
+
+		foto := models.Foto{
+			WisataID: wisataID,
+			URL:      publicURL,
+		}
+
+		err = repository.CreateWisataFoto(foto)
+		if err != nil {
+			return fmt.Errorf(
+				"create wisata foto: %w",
+				err,
+			)
+		}
+	}
+
+	return nil
+}
+
