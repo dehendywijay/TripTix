@@ -79,7 +79,7 @@ func LoginUser(c *gin.Context) {
 		7*24*60*60, 
 		"/",
 		"",
-		true, 
+		false, 
 		true,  
 	)
 
@@ -122,6 +122,22 @@ func RefreshToken(c *gin.Context) {
 		},
 	})
 
+}
+
+func LogoutUser(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err == nil {
+
+		hashedToken := utils.HashToken(refreshToken)
+
+		err := services.RevokeRefreshToken(hashedToken)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Gagal Revoke Refresh Token",
+			})
+			return
+		}
+	}
 }
 
 
