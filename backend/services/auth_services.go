@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"time"
 	"triptix/config"
 	"triptix/dto"
 	"triptix/models"
@@ -17,7 +18,7 @@ func RegisterUser(data models.User) (models.User, error) {
 
 func LoginUser(email string, password string) (dto.LoginRespone, error) {
 	var user models.User
-	err := config.DB.Where("email = ?", email).First(&user).Error
+	err := config.DB.Select("id", "email").Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
@@ -27,6 +28,7 @@ func LoginUser(email string, password string) (dto.LoginRespone, error) {
 	}
 
 	return dto.LoginRespone{
+		ID:    user.ID,
 		Email: user.Email,
 	}, nil
 }
@@ -74,4 +76,15 @@ func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
 	}
 
 	return response, nil
+}
+
+
+func CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
+	refreshToken := models.RefreshToken{
+		UserID: id, 
+		TokenHash: hash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	 }
+	err := config.DB.Create(&refreshToken).Error
+	return refreshToken, err
 }
