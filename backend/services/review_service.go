@@ -1,15 +1,16 @@
 package services
 
 import (
-	"triptix/config"
+	"fmt"
 	"triptix/dto"
 	"triptix/models"
-
-	"gorm.io/gorm"
+	"triptix/repository"
 )
 
+func CreateReview(
+	req dto.CreateReviewRequest,
+) (dto.ReviewResponse, error) {
 
-func CreateReview(req dto.CreateReviewRequest) (dto.ReviewResponse, error) {
 	review := models.Review{
 		UserID:   req.UserID,
 		WisataID: req.WisataID,
@@ -17,9 +18,10 @@ func CreateReview(req dto.CreateReviewRequest) (dto.ReviewResponse, error) {
 		Comment:  req.Comment,
 	}
 
-	err := config.DB.Create(&review).Error
+	err := repository.CreateReview(review)
 	if err != nil {
-		return dto.ReviewResponse{}, err
+		return dto.ReviewResponse{},
+			fmt.Errorf("create review: %w", err)
 	}
 
 	return dto.ReviewResponse{
@@ -31,39 +33,44 @@ func CreateReview(req dto.CreateReviewRequest) (dto.ReviewResponse, error) {
 	}, nil
 }
 
+func GetReviewsByWisataID(
+	wisataID uint,
+) (dto.ReviewsByWisataResponse, error) {
 
-func GetReviewsByWisataID(wisataID uint) (dto.ReviewsByWisataResponse, error) {
+	wisata, err := repository.GetWisataByIDWisata(
+		wisataID,
+	)
 
-	var wisata models.Wisata
-	err := config.DB.
-		Select("id", "nama").
-		First(&wisata, wisataID).Error
 	if err != nil {
-		return dto.ReviewsByWisataResponse{}, err
+		return dto.ReviewsByWisataResponse{},
+			fmt.Errorf("get wisata by id: %w", err)
 	}
 
-	var reviews []models.Review
-	err = config.DB.
-		Preload("User", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "nama")
-		}).
-		Where("wisata_id = ?", wisataID).
-		Find(&reviews).Error
+	reviews, err := repository.GetReviewsByWisataID(
+		wisataID,
+	)
+
 	if err != nil {
-		return dto.ReviewsByWisataResponse{}, err
+		return dto.ReviewsByWisataResponse{},
+			fmt.Errorf("get reviews by wisata: %w", err)
 	}
 
 	var reviewResponses []dto.ReviewItemResponse
+
 	for _, r := range reviews {
-		reviewResponses = append(reviewResponses, dto.ReviewItemResponse{
-			ID:      r.ID,
-			Rating:  r.Rating,
-			Comment: r.Comment,
-			User: dto.UserReviewResponse{
-				ID:   r.User.ID,
-				Nama: r.User.Nama,
+
+		reviewResponses = append(
+			reviewResponses,
+			dto.ReviewItemResponse{
+				ID:      r.ID,
+				Rating:  r.Rating,
+				Comment: r.Comment,
+				User: dto.UserReviewResponse{
+					ID:   r.User.ID,
+					Nama: r.User.Nama,
+				},
 			},
-		})
+		)
 	}
 
 	response := dto.ReviewsByWisataResponse{
