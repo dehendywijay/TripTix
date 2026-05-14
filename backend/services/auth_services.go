@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"time"
 	"triptix/config"
 	"triptix/dto"
 	"triptix/models"
@@ -15,20 +16,18 @@ func RegisterUser(data models.User) (models.User, error) {
 	return data, err
 }
 
-func LoginUser(email string, password string) (dto.LoginRespone, error) {
+func LoginUser(email string, password string) (models.User, error) {
 	var user models.User
-	err := config.DB.Where("email = ?", email).First(&user).Error
+	err := config.DB.Select("id", "email").Where("email = ?", email).First(&user).Error
 	if err != nil {
-		return dto.LoginRespone{}, err
+		return user, err
 	}
 
 	if !utils.CheckPassword(user.Password, password) {
-		return dto.LoginRespone{}, fmt.Errorf("invalid credentials")
+		return user, fmt.Errorf("invalid credentials")
 	}
 
-	return dto.LoginRespone{
-		Email: user.Email,
-	}, nil
+	return user, nil
 }
 
 func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
@@ -74,4 +73,25 @@ func GetUser(email string) (dto.ReviewsByUserResponse ,error) {
 	}
 
 	return response, nil
+}
+
+
+func CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
+	refreshToken := models.RefreshToken{
+		UserID: id, 
+		TokenHash: hash,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	 }
+	err := config.DB.Create(&refreshToken).Error
+	return refreshToken, err
+}
+
+func GetRefreshToken(hash string) (models.RefreshToken, error) {
+	var refreshToken models.RefreshToken
+	err := config.DB.Where("token_hash = ? AND revoked = false", hash).First(&refreshToken).Error
+	return refreshToken, err
+}
+
+func RevokeRefreshToken(hash string) error {
+	return config.DB.Model(&models.RefreshToken{}).Where("token_hash = ?", hash).Update("revoked", true).Error
 }
