@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"os"
 	"time"
 
@@ -33,13 +35,13 @@ func GenerateAccessToken(userID uint) (string, error) {
 	return token.SignedString(getAccessSecret())
 }
 
-func GenerateRefreshToken(userID uint) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"type":    "refresh",
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
+func GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(getRefreshSecret())
+	return base64.URLEncoding.EncodeToString(b), nil
 }
