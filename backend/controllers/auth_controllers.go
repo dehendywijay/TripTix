@@ -5,7 +5,7 @@ import (
 	"triptix/dto"
 	"triptix/models"
 	"triptix/services"
-	"triptix/utils"
+
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,30 +17,20 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(user.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	user.Password = hashedPassword
-	user, err = services.RegisterUser(user)
+	user, err := services.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User created successfully",
+		"message": "Akun Berhasil Dibuat",
 		"data":    user,
 	})
 }
 
 func LoginUser(c *gin.Context) {
-	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var req dto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -49,45 +39,12 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	user, err := services.LoginUser(req.Email, req.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Password atau email Salah",
-		})
-		return
-	}
-
-	refreshTokenValue, err := utils.GenerateRefreshToken()
+	data, err := services.LoginUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Refresh Token",
+			"error": "Login gagal",
 		})
 		return
-	}
-
-	refreshTokenHash := utils.HashToken(refreshTokenValue)
-
-	token, err := utils.GenerateAccessToken(user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Refresh Token",
-		})
-		return
-	}
-
-	_ , err = services.CreateRefreshToken(user.ID, refreshTokenHash)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal membuat refresh token",
-		})
-		return
-	}
-
-	data := dto.LoginRespone{
-		ID:            user.ID,
-		Email:         user.Email,
-		RefreshToken:  refreshTokenValue,
-		AccesToken:    token,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -105,19 +62,10 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	refreshTokenHash := utils.HashToken(req.RefreshToken)
-	valid, err := services.GetRefreshToken(refreshTokenHash)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "refresh token tidak valid",
-		})
-		return
-	}
-
-	accesToken , err := utils.GenerateAccessToken(valid.UserID)
+	accesToken, err := services.RefreshToken(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Gagal Generate Access Token",
+			"error": "Refresh token gagal",
 		})
 		return
 	}
@@ -132,19 +80,25 @@ func RefreshToken(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err == nil {
+	var req dto.RefreshTokenRequest
 
-		hashedToken := utils.HashToken(refreshToken)
-
-		err := services.RevokeRefreshToken(hashedToken)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Gagal Revoke Refresh Token",
-			})
-			return
-		}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid request",
+		})
+		return
 	}
+
+	err := services.LogoutUser(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "logout gagal",
+		})
+		return
+	}
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "logout berhasil",
+	})
 }
 
 
@@ -161,7 +115,7 @@ func GetUser(c *gin.Context) {
 	user, err := services.GetUser(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Email tidak ditemukan",
+			"error": err.Error(),
 		})
 		return
 	}

@@ -1,12 +1,12 @@
 package controller
 
 import (
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"triptix/models"
+	"triptix/repository"
 	"triptix/services"
-	"triptix/storage"
-	"triptix/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +27,14 @@ func CreateWisata(c *gin.Context) {
 	}
 
 	files := form.File["fotos"]
-	durasii, _ := strconv.Atoi(durasi)
-	hargaa, _ := strconv.Atoi(harga)
+	durasii, err := strconv.Atoi(durasi)
+	if err != nil {
+		return
+	}
+	hargaa, err := strconv.Atoi(harga)
+	if err != nil {
+		return
+	}
 
 	if nama == "" || alamat == "" || deskripsi == "" || durasi == "" || jenis == "" || harga == "" || kategori == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Semua field harus diisi"})
@@ -44,35 +50,10 @@ func CreateWisata(c *gin.Context) {
 		Kategori:  kategori,
 	}
 
-	result, err := services.CreateWisata(wisata)
+	result, err := services.CreateWisata(wisata, files)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	for _, file := range files {
-		fileBytes, objectPath, contentType, err := utils.ProcessImageUpload(file)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		publicURL, err := storage.UploadToSupabase("wisata_image", objectPath, contentType, fileBytes)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		foto := models.Foto{
-			WisataID: result.ID,
-			URL:      publicURL,
-		}
-		if err := services.CreateWisataFoto(foto); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -83,109 +64,77 @@ func CreateWisata(c *gin.Context) {
 }
 
 func EditWisata(c *gin.Context) {
+
 	id := c.Param("id")
-	idFoto := c.PostForm("id_foto")
-	nama := c.PostForm("nama")
-	alamat := c.PostForm("alamat")
-	deskripsi := c.PostForm("deskripsi")
-	durasi := c.PostForm("durasi")
-	jenis := c.PostForm("jenis")
-	harga := c.PostForm("harga")
-	kategori := c.PostForm("kategori")
 
-	// form, err := c.MultipartForm()
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "S"})
-	// 	return
-	// }
+	idd, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "id tidak valid",
+		})
+		return
+	}
 
-	// files := form.File["fotos"]
-	durasii, _ := strconv.Atoi(durasi)
-	idd, _ := strconv.Atoi(id)
-	hargaa, _ := strconv.Atoi(harga)
+	durasi, err := strconv.Atoi(c.PostForm("durasi"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "durasi harus angka",
+		})
+		return
+	}
 
-	if nama == "" || alamat == "" || deskripsi == "" || durasi == "" || jenis == "" || harga == "" || kategori == "" {
-
+	harga, err := strconv.Atoi(c.PostForm("harga"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "harga harus angka",
+		})
+		return
 	}
 
 	wisata := models.Wisata{
-		Nama:      nama,
-		Alamat:    alamat,
-		Deskripsi: deskripsi,
-		Durasi:    durasii,
-		Jenis:     jenis,
-		Harga:     hargaa,
-		Kategori:  kategori,
+		Nama:      c.PostForm("nama"),
+		Alamat:    c.PostForm("alamat"),
+		Deskripsi: c.PostForm("deskripsi"),
+		Durasi:    durasi,
+		Jenis:     c.PostForm("jenis"),
+		Harga:     harga,
+		Kategori:  c.PostForm("kategori"),
+	}
+
+	form, _ := c.MultipartForm()
+
+	var files []*multipart.FileHeader
+
+	if form != nil {
+		files = form.File["fotos"]
 	}
 
 	fileEdit, _ := c.FormFile("fotoEdit")
-	if fileEdit != nil {
-		oldObjectPath, err := services.GetFotoWisata(id, idFoto)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
 
-		oldFoto := utils.ExtractObjectPath(oldObjectPath.URL, "wisata_image")
-		FileBytes, ObjectPath, contentType, err := utils.ProcessImageUploadUpdate(c, "fotoEdit")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	err = services.EditWisata(
+		uint(idd),
+		c.PostForm("id_foto"),
+		wisata,
+		files,
+		fileEdit,
+		c,
+	)
 
-		publicURL, err := storage.UpdateSupabaseFile("wisata_image", oldFoto, ObjectPath, contentType, FileBytes)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		foto := models.Foto{
-			URL:      publicURL,
-		}
-
-		
-		if err := services.UpdateWisataFoto(foto, idFoto); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 
-		form, err := c.MultipartForm()
-		if err == nil {
-		files := form.File["fotos"]
-
-		for _, file := range files {
-			fileBytes, objectPath, contentType, err := utils.ProcessImageUpload(file)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-
-			publicURL, err := storage.UploadToSupabase("wisata_image", objectPath, contentType, fileBytes)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			foto := models.Foto{
-				WisataID: uint(idd),
-				URL:      publicURL,
-			}
-			if err := services.CreateWisataFoto(foto); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-
-		}
-	}
-	
-	_ , err = services.EditWisata(id, wisata)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "wisata berhasil diupdate",
+		"success": true,
+	})
 }
 
 func GetAllWisata(c *gin.Context) {
-	wisata, err := services.GetAllWisata()
+	wisata, err := repository.GetAllWisata()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Gagal mengambil data wisata",
@@ -199,7 +148,7 @@ func GetAllWisata(c *gin.Context) {
 
 func GetWisataByID(c *gin.Context) {
 	id := c.Param("id")
-	wisata, err := services.GetWisataByID(id)
+	wisata, err := repository.GetWisataByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Data wisata tidak ditemukan",

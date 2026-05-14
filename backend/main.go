@@ -15,7 +15,7 @@ func main() {
 	r.Use(middleware.CORSMiddleware())
 	
 	config.ConnectDB()
-	config.DB.AutoMigrate(&models.Wisata{}, &models.User{}, &models.Foto{}, &models.Review{})
+	config.DB.AutoMigrate(&models.Wisata{}, &models.User{}, &models.Foto{}, &models.Review{}, &models.RefreshToken{})
 
 	routes.WisataRoute(r)
 	routes.UserRoute(r)
