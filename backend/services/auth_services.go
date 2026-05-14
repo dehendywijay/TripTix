@@ -27,9 +27,15 @@ func LoginUser(email string, password string) (dto.LoginRespone, error) {
 		return dto.LoginRespone{}, fmt.Errorf("invalid credentials")
 	}
 
+	token, err := utils.GenerateAccessToken(user.ID)
+	if err != nil {
+		return dto.LoginRespone{}, err
+	}
+
 	return dto.LoginRespone{
 		ID:    user.ID,
 		Email: user.Email,
+		Token: token,
 	}, nil
 }
 
@@ -86,5 +92,11 @@ func CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	 }
 	err := config.DB.Create(&refreshToken).Error
+	return refreshToken, err
+}
+
+func GetRefreshToken(hash string) (models.RefreshToken, error) {
+	var refreshToken models.RefreshToken
+	err := config.DB.Where("token_hash = ? AND revoked = false", hash).First(&refreshToken).Error
 	return refreshToken, err
 }
