@@ -132,19 +132,29 @@ func RefreshToken(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err == nil {
 
-		hashedToken := utils.HashToken(refreshToken)
+	var req dto.RefreshTokenRequest
 
-		err := services.RevokeRefreshToken(hashedToken)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Gagal Revoke Refresh Token",
-			})
-			return
-		}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid request",
+		})
+		return
 	}
+
+	hashedToken := utils.HashToken(req.RefreshToken)
+
+	err := services.RevokeRefreshToken(hashedToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "logout gagal",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "logout berhasil",
+	})
 }
 
 
