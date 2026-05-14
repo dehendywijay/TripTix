@@ -35,3 +35,4 @@ func ReviewRoute(r *gin.Engine) {
 		review.GET("/wisata/:wisata_id", controller.GetReviewsByWisata)
 	}
 }
+
