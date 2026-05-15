@@ -92,10 +92,45 @@ func (s *AuthService) LogoutUser(req dto.RefreshTokenRequest) error {
 	return nil
 }
 
-func (s *AuthService) GetUser(email string) (dto.ReviewsByUserResponse, error) {
-	result, err := s.r.GetUser(email)
+func (s *AuthService) GetReviewsByUserEmail(
+	email string,
+) (dto.ReviewsByUserResponse, error) {
+
+	user, err := s.r.GetUserByEmail(email)
 	if err != nil {
 		return dto.ReviewsByUserResponse{}, err
 	}
-	return result, nil
+
+	reviews, err := s.r.GetReviewsByUserID(user.ID)
+	if err != nil {
+		return dto.ReviewsByUserResponse{}, err
+	}
+
+	var reviewResponses []dto.ReviewsItemByUserResponse
+
+	for _, review := range reviews {
+
+		reviewResponses = append(
+			reviewResponses,
+			dto.ReviewsItemByUserResponse{
+				ID:      review.ID,
+				Rating:  review.Rating,
+				Comment: review.Comment,
+				Wisata: dto.WisataReviewResponse{
+					ID:   review.Wisata.ID,
+					Nama: review.Wisata.Nama,
+				},
+			},
+		)
+	}
+
+	response := dto.ReviewsByUserResponse{
+		User: dto.UserReviewResponse{
+			ID:   user.ID,
+			Nama: user.Nama,
+		},
+		Reviews: reviewResponses,
+	}
+
+	return response, nil
 }
