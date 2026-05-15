@@ -34,8 +34,8 @@ func (s *AuthService) RegisterUser(user *models.User) error {
 
 }
 
-func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
-	result, err := repository.LoginUser(user.Email, user.Password)
+func (s *AuthService) LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
+	result, err := s.r.LoginUser(user.Email, user.Password)
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
@@ -52,7 +52,7 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 		return dto.LoginRespone{}, err
 	}
 
-	_, err = repository.CreateRefreshToken(result.ID, refreshTokenHash)
+	_, err = s.r.CreateRefreshToken(result.ID, refreshTokenHash)
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
@@ -67,9 +67,9 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 	return data, nil
 }
 
-func RefreshToken(req dto.RefreshTokenRequest) (string, error) {
+func (s *AuthService) RefreshToken(req dto.RefreshTokenRequest) (string, error) {
 	refreshTokenHash := utils.HashToken(req.RefreshToken)
-	valid, err := repository.GetRefreshToken(refreshTokenHash)
+	valid, err := s.r.GetRefreshToken(refreshTokenHash)
 	if err != nil {
 		return " ", err
 	}
@@ -82,9 +82,9 @@ func RefreshToken(req dto.RefreshTokenRequest) (string, error) {
 	return accesToken, nil
 }
 
-func LogoutUser(req dto.RefreshTokenRequest) error {
+func (s *AuthService) LogoutUser(req dto.RefreshTokenRequest) error {
 	hashedToken := utils.HashToken(req.RefreshToken)
-	err := repository.RevokeRefreshToken(hashedToken)
+	err := s.r.RevokeRefreshToken(hashedToken)
 	if err != nil {
 		return err
 	}
@@ -92,8 +92,8 @@ func LogoutUser(req dto.RefreshTokenRequest) error {
 	return nil
 }
 
-func GetUser(email string) (dto.ReviewsByUserResponse, error) {
-	result, err := repository.GetUser(email)
+func (s *AuthService) GetUser(email string) (dto.ReviewsByUserResponse, error) {
+	result, err := s.r.GetUser(email)
 	if err != nil {
 		return dto.ReviewsByUserResponse{}, err
 	}

@@ -31,10 +31,10 @@ func UserRoute(r *gin.Engine) {
 	user := r.Group("/api/user")
 	{
 		user.POST("/register", authController.RegisterUser)
-		user.POST("/login", controller.LoginUser)
-		user.GET("/:email", controller.GetUser)
-		user.POST("/logout", controller.LogoutUser)
-		user.POST("/refresh", controller.RefreshToken)
+		user.POST("/login", authController.LoginUser)
+		user.GET("/:email", authController.GetUser)
+		user.POST("/logout", authController.LogoutUser)
+		user.POST("/refresh", authController.RefreshToken)
 	}
 }
 

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-	"triptix/internal/dto" 
+	"triptix/internal/dto"
 	"triptix/internal/models"
 	"triptix/internal/services"
 
@@ -44,7 +44,7 @@ func (h *AuthControllers) RegisterUser(c *gin.Context) {
 	})
 }
 
-func LoginUser(c *gin.Context) {
+func (h *AuthControllers) LoginUser(c *gin.Context) {
 	var req dto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -54,7 +54,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	data, err := services.LoginUser(req)
+	data, err := h.s.LoginUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Login gagal",
@@ -68,7 +68,7 @@ func LoginUser(c *gin.Context) {
 	})
 }
 
-func RefreshToken(c *gin.Context) {
+func (h *AuthControllers) RefreshToken(c *gin.Context) {
 	var req dto.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -77,7 +77,7 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accesToken, err := services.RefreshToken(req)
+	accesToken, err := h.s.RefreshToken(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Refresh token gagal",
@@ -94,7 +94,7 @@ func RefreshToken(c *gin.Context) {
 
 }
 
-func LogoutUser(c *gin.Context) {
+func (h *AuthControllers) LogoutUser(c *gin.Context) {
 	var req dto.RefreshTokenRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -104,7 +104,7 @@ func LogoutUser(c *gin.Context) {
 		return
 	}
 
-	err := services.LogoutUser(req)
+	err := h.s.LogoutUser(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "logout gagal",
@@ -116,7 +116,7 @@ func LogoutUser(c *gin.Context) {
 	})
 }
 
-func GetUser(c *gin.Context) {
+func (h *AuthControllers) GetUser(c *gin.Context) {
 	email := c.Param("email")
 
 	if email == "" {
@@ -126,7 +126,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := services.GetUser(email)
+	user, err := h.s.GetUser(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
