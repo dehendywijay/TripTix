@@ -11,9 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterUser(data models.User) (models.User, error) {
-	err := config.DB.Create(&data).Error
-	return data, err
+type AuthRepositoryInterface interface {
+	RegisterUser(
+		user *models.User,
+	) error
+}
+
+type AuthRepository struct { 
+	GormDB      *gorm.DB
+}
+
+func (r *AuthRepository) RegisterUser(data *models.User) ( error) {
+	return r.GormDB.Create(&data).Error
 }
 
 func LoginUser(email string, password string) (models.User, error) {

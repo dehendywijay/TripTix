@@ -2,23 +2,39 @@ package controller
 
 import (
 	"net/http"
-	"triptix/internal/dto"
+	"triptix/internal/dto" 
 	"triptix/internal/models"
 	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterUser(c *gin.Context) {
+type AuthControllers struct {
+	s *services.AuthService
+}
+
+func NewAuthControllers(s *services.AuthService) *AuthControllers {
+	return &AuthControllers{
+		s: s,
+	}
+}
+
+func (h *AuthControllers) RegisterUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
 		return
 	}
 
-	user, err := services.RegisterUser(user)
+	err := h.s.RegisterUser(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
 		return
 	}
 

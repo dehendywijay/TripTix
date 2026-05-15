@@ -9,19 +9,29 @@ import (
 	"triptix/pkg/utils"
 )
 
-func RegisterUser(user models.User) (models.User, error) {
+type AuthService struct {
+	r repository.AuthRepositoryInterface
+}
+
+func NewAuthService(r repository.AuthRepositoryInterface) *AuthService {
+	return &AuthService{
+		r: r,
+	}
+}
+
+func (s *AuthService) RegisterUser(user *models.User) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
-		return user, err
+		return err
 	}
 	user.Password = hashedPassword
 
-	result, err := repository.RegisterUser(user)
+	err = s.r.RegisterUser(user)
 	if err != nil {
-		return user, err
+		return err
 	}
-	return result, err
-	
+	return err
+
 }
 
 func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
@@ -42,16 +52,16 @@ func LoginUser(user dto.LoginRequest) (dto.LoginRespone, error) {
 		return dto.LoginRespone{}, err
 	}
 
-	_ , err = repository.CreateRefreshToken(result.ID, refreshTokenHash)
+	_, err = repository.CreateRefreshToken(result.ID, refreshTokenHash)
 	if err != nil {
 		return dto.LoginRespone{}, err
 	}
 
 	data := dto.LoginRespone{
-		ID:            result.ID,
-		Email:         result.Email,
-		RefreshToken:  refreshTokenValue,
-		AccesToken:    AccessToken,
+		ID:           result.ID,
+		Email:        result.Email,
+		RefreshToken: refreshTokenValue,
+		AccesToken:   AccessToken,
 	}
 
 	return data, nil
@@ -64,7 +74,7 @@ func RefreshToken(req dto.RefreshTokenRequest) (string, error) {
 		return " ", err
 	}
 
-	accesToken , err := jwt.GenerateAccessToken(valid.UserID)
+	accesToken, err := jwt.GenerateAccessToken(valid.UserID)
 	if err != nil {
 		return " ", err
 	}

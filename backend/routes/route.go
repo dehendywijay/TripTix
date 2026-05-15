@@ -1,10 +1,15 @@
 package routes
 
 import (
-	"triptix/internal/controllers"
+	controller "triptix/internal/controllers"
+	"triptix/internal/repository"
+	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
+
+var db *gorm.DB
 
 func WisataRoute(r *gin.Engine) {
 	wisata := r.Group("/api/wisata")
@@ -18,9 +23,14 @@ func WisataRoute(r *gin.Engine) {
 }
 
 func UserRoute(r *gin.Engine) {
+	authRepo := &repository.AuthRepository{
+		GormDB: db,
+	}
+	authService := services.NewAuthService(authRepo)
+	authController := controller.NewAuthControllers(authService)
 	user := r.Group("/api/user")
 	{
-		user.POST("/register", controller.RegisterUser)
+		user.POST("/register", authController.RegisterUser)
 		user.POST("/login", controller.LoginUser)
 		user.GET("/:email", controller.GetUser)
 		user.POST("/logout", controller.LogoutUser)
@@ -35,4 +45,3 @@ func ReviewRoute(r *gin.Engine) {
 		review.GET("/wisata/:wisata_id", controller.GetReviewsByWisata)
 	}
 }
-
