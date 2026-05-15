@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 	"time"
-	"triptix/config"
 	"triptix/internal/dto"
 	"triptix/internal/models"
 	"triptix/pkg/utils"
@@ -11,14 +10,50 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterUser(data models.User) (models.User, error) {
-	err := config.DB.Create(&data).Error
-	return data, err
+type AuthRepositoryInterface interface {
+	RegisterUser(
+		user *models.User,
+	) error
+
+	LoginUser(
+		email string,
+		password string,
+	) (models.User, error)
+
+	GetUser(email string) (dto.ReviewsByUserResponse, error)
+
+	GetUserByID(id uint) (models.User, error)
+
+	CreateRefreshToken(
+		id uint,
+		hash string,
+	) (models.RefreshToken, error)
+
+	GetRefreshToken(
+		hash string,
+	) (models.RefreshToken, error)
+
+	RevokeRefreshToken(
+		hash string,
+	) error
 }
 
-func LoginUser(email string, password string) (models.User, error) {
+type AuthRepository struct {
+	GormDB *gorm.DB
+}
+
+// GetUserByID implements [AuthRepositoryInterface].
+func (r *AuthRepository) GetUserByID(id uint) (models.User, error) {
+	panic("unimplemented")
+}
+
+func (r *AuthRepository) RegisterUser(data *models.User) error {
+	return r.GormDB.Create(&data).Error
+}
+
+func (r *AuthRepository) LoginUser(email string, password string) (models.User, error) {
 	var user models.User
-	err := config.DB.Select("id", "email", "password").Where("email = ?", email).First(&user).Error
+	err := r.GormDB.Select("id", "email", "password").Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return user, err
 	}
@@ -30,9 +65,9 @@ func LoginUser(email string, password string) (models.User, error) {
 	return user, err
 }
 
-func GetUser(email string) (dto.ReviewsByUserResponse, error) {
+func (r *AuthRepository) GetUser(email string) (dto.ReviewsByUserResponse, error) {
 	var user models.User
-	err := config.DB.
+	err := r.GormDB.
 		Select("id", "nama").
 		Where("email = ?", email).
 		First(&user).Error
@@ -41,7 +76,7 @@ func GetUser(email string) (dto.ReviewsByUserResponse, error) {
 	}
 
 	var reviews []models.Review
-	err = config.DB.
+	err = r.GormDB.
 		Preload("Wisata", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "nama")
 		}).
@@ -75,22 +110,22 @@ func GetUser(email string) (dto.ReviewsByUserResponse, error) {
 	return response, nil
 }
 
-func CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
+func (r *AuthRepository) CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {
 	refreshToken := models.RefreshToken{
 		UserID:    id,
 		TokenHash: hash,
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	err := config.DB.Create(&refreshToken).Error
+	err := r.GormDB.Create(&refreshToken).Error
 	return refreshToken, err
 }
 
-func GetRefreshToken(hash string) (models.RefreshToken, error) {
+func (r *AuthRepository) GetRefreshToken(hash string) (models.RefreshToken, error) {
 	var refreshToken models.RefreshToken
-	err := config.DB.Where("token_hash = ? AND revoked = false", hash).First(&refreshToken).Error
+	err := r.GormDB.Where("token_hash = ? AND revoked = false", hash).First(&refreshToken).Error
 	return refreshToken, err
 }
 
-func RevokeRefreshToken(hash string) error {
-	return config.DB.Model(&models.RefreshToken{}).Where("token_hash = ?", hash).Update("revoked", true).Error
+func (r *AuthRepository) RevokeRefreshToken(hash string) error {
+	return r.GormDB.Model(&models.RefreshToken{}).Where("token_hash = ?", hash).Update("revoked", true).Error
 }
