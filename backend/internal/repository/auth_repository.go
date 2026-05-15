@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 	"time"
-	"triptix/internal/dto"
 	"triptix/internal/models"
 	"triptix/pkg/utils"
 
@@ -20,9 +19,9 @@ type AuthRepositoryInterface interface {
 		password string,
 	) (models.User, error)
 
-	GetUser(email string) (dto.ReviewsByUserResponse, error)
+	GetReviewsByUserID(userID uint,) ([]models.Review, error)
+	GetUserByEmail(email string,) (*models.User, error)
 
-	GetUserByID(id uint) (models.User, error)
 
 	CreateRefreshToken(
 		id uint,
@@ -42,10 +41,6 @@ type AuthRepository struct {
 	GormDB *gorm.DB
 }
 
-// GetUserByID implements [AuthRepositoryInterface].
-func (r *AuthRepository) GetUserByID(id uint) (models.User, error) {
-	panic("unimplemented")
-}
 
 func (r *AuthRepository) RegisterUser(data *models.User) error {
 	return r.GormDB.Create(&data).Error
@@ -65,49 +60,38 @@ func (r *AuthRepository) LoginUser(email string, password string) (models.User, 
 	return user, err
 }
 
-func (r *AuthRepository) GetUser(email string) (dto.ReviewsByUserResponse, error) {
+func (r *AuthRepository) GetUserByEmail(email string,) (*models.User, error) {
+
 	var user models.User
+
 	err := r.GormDB.
 		Select("id", "nama").
 		Where("email = ?", email).
 		First(&user).Error
+
 	if err != nil {
-		return dto.ReviewsByUserResponse{}, err
+		return nil, err
 	}
 
+	return &user, nil
+}
+
+func (r *AuthRepository) GetReviewsByUserID(userID uint,) ([]models.Review, error) {
+
 	var reviews []models.Review
-	err = r.GormDB.
+
+	err := r.GormDB.
 		Preload("Wisata", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "nama")
 		}).
-		Where("user_id = ?", user.ID).
+		Where("user_id = ?", userID).
 		Find(&reviews).Error
+
 	if err != nil {
-		return dto.ReviewsByUserResponse{}, err
+		return nil, err
 	}
 
-	var reviewResponses []dto.ReviewsItemByUserResponse
-	for _, r := range reviews {
-		reviewResponses = append(reviewResponses, dto.ReviewsItemByUserResponse{
-			ID:      r.ID,
-			Rating:  r.Rating,
-			Comment: r.Comment,
-			Wisata: dto.WisataReviewResponse{
-				ID:   r.Wisata.ID,
-				Nama: r.Wisata.Nama,
-			},
-		})
-	}
-
-	response := dto.ReviewsByUserResponse{
-		User: dto.UserReviewResponse{
-			ID:   user.ID,
-			Nama: user.Nama,
-		},
-		Reviews: reviewResponses,
-	}
-
-	return response, nil
+	return reviews, nil
 }
 
 func (r *AuthRepository) CreateRefreshToken(id uint, hash string) (models.RefreshToken, error) {

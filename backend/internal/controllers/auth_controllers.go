@@ -126,7 +126,7 @@ func (h *AuthControllers) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.s.GetUser(email)
+	user, err := h.s.GetReviewsByUserEmail(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
