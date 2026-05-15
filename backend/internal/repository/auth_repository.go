@@ -18,11 +18,8 @@ type AuthRepositoryInterface interface {
 		email string,
 		password string,
 	) (models.User, error)
-
 	GetReviewsByUserID(userID uint,) ([]models.Review, error)
 	GetUserByEmail(email string,) (*models.User, error)
-
-
 	CreateRefreshToken(
 		id uint,
 		hash string,

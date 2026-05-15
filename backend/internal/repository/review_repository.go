@@ -2,26 +2,35 @@ package repository
 
 import (
 	"fmt"
-	"triptix/config"
 	"triptix/internal/models"
 
 	"gorm.io/gorm"
 )
 
-func CreateReview(
+type ReviewRepositoryInterface interface { 
+	CreateReview(data models.Review) error
+	GetWisataByIDWisata(id uint) (models.Wisata, error)
+	GetReviewsByWisataID(wisataID uint) ([]models.Review, error)
+}
+
+type ReviewRepository struct {
+	GormDB *gorm.DB
+}
+
+func (r *ReviewRepository) CreateReview(
 	data models.Review,
 ) error {
 
-	return config.DB.Create(&data).Error
+	return r.GormDB.Create(&data).Error
 }
 
-func GetWisataByIDWisata(
+func (r *ReviewRepository) GetWisataByIDWisata(
 	id uint,
 ) (models.Wisata, error) {
 
 	var wisata models.Wisata
 
-	err := config.DB.
+	err := r.GormDB.
 		Select("id", "nama").
 		First(&wisata, id).Error
 
@@ -33,13 +42,13 @@ func GetWisataByIDWisata(
 	return wisata, nil
 }
 
-func GetReviewsByWisataID(
+func (r *ReviewRepository) GetReviewsByWisataID(
 	wisataID uint,
 ) ([]models.Review, error) {
 
 	var reviews []models.Review
 
-	err := config.DB.
+	err := r.GormDB.
 		Preload("User", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "nama")
 		}).

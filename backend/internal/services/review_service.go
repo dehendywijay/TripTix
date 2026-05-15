@@ -7,7 +7,17 @@ import (
 	"triptix/internal/repository"
 )
 
-func CreateReview(
+type ReviewService struct {
+	r repository.ReviewRepositoryInterface
+}
+
+func NewReviewService(r repository.ReviewRepositoryInterface) *ReviewService {
+	return &ReviewService{
+		r: r,
+	}
+}
+
+func (s *ReviewService) CreateReview(
 	req dto.CreateReviewRequest,
 ) (dto.ReviewResponse, error) {
 
@@ -18,7 +28,7 @@ func CreateReview(
 		Comment:  req.Comment,
 	}
 
-	err := repository.CreateReview(review)
+	err := s.r.CreateReview(review)
 	if err != nil {
 		return dto.ReviewResponse{},
 			fmt.Errorf("create review: %w", err)
@@ -33,11 +43,11 @@ func CreateReview(
 	}, nil
 }
 
-func GetReviewsByWisataID(
+func (s *ReviewService) GetReviewsByWisataID(
 	wisataID uint,
 ) (dto.ReviewsByWisataResponse, error) {
 
-	wisata, err := repository.GetWisataByIDWisata(
+	wisata, err := s.r.GetWisataByIDWisata(
 		wisataID,
 	)
 
@@ -46,7 +56,7 @@ func GetReviewsByWisataID(
 			fmt.Errorf("get wisata by id: %w", err)
 	}
 
-	reviews, err := repository.GetReviewsByWisataID(
+	reviews, err := s.r.GetReviewsByWisataID(
 		wisataID,
 	)
 
