@@ -39,9 +39,14 @@ func UserRoute(r *gin.Engine) {
 }
 
 func ReviewRoute(r *gin.Engine) {
+	reviewRepo := &repository.ReviewRepository{
+		GormDB: db,
+	}
+	reviewService := services.NewReviewService(reviewRepo)
+	reviewController := controller.NewReviewControllers(reviewService)
 	review := r.Group("/api/reviews")
 	{
-		review.POST("", controller.CreateReview)
-		review.GET("/wisata/:wisata_id", controller.GetReviewsByWisata)
+		review.POST("", reviewController.CreateReview)
+		review.GET("/wisata/:wisata_id", reviewController.GetReviewsByWisata)
 	}
 }

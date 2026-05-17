@@ -8,6 +8,7 @@ import (
 	"triptix/routes"
 
 	"github.com/gin-gonic/gin"
+
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	
 	config.ConnectDB()
 	config.DB.AutoMigrate(&models.Wisata{}, &models.User{}, &models.Foto{}, &models.Review{},)
+
 
 	routes.WisataRoute(r)
 	routes.UserRoute(r)
