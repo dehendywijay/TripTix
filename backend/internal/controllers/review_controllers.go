@@ -8,9 +8,19 @@ import (
 	"triptix/internal/services"
 
 	"github.com/gin-gonic/gin"
-)
+) 
 
-func CreateReview(c *gin.Context) {
+type ReviewControllers struct {
+	s *services.ReviewService
+}
+
+func NewReviewControllers(s *services.ReviewService) *ReviewControllers {
+	return &ReviewControllers{
+		s: s,
+	}
+}
+
+func (h *ReviewControllers) CreateReview(c *gin.Context) {
 
 	var req dto.CreateReviewRequest
 
@@ -23,7 +33,7 @@ func CreateReview(c *gin.Context) {
 		return
 	}
 
-	result, err := services.CreateReview(req)
+	result, err := h.s.CreateReview(req)
 
 	if err != nil {
 
@@ -40,7 +50,7 @@ func CreateReview(c *gin.Context) {
 	})
 }
 
-func GetReviewsByWisata(c *gin.Context) {
+func (h *ReviewControllers) GetReviewsByWisata(c *gin.Context) {
 
 	wisataIDParam := c.Param("wisata_id")
 
@@ -57,7 +67,7 @@ func GetReviewsByWisata(c *gin.Context) {
 		return
 	}
 
-	reviews, err := services.GetReviewsByWisataID(
+	reviews, err := h.s.GetReviewsByWisataID(
 		uint(wisataID),
 	)
 
